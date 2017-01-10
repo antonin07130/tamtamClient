@@ -9,7 +9,7 @@ import static android.content.ContentValues.TAG;
 
 /**
  * Created by pascalbodin on 17/09/16.
- * An object used to represnet a Thing in Json.
+ * An object used to represnet a ThingObject in Json.
  */
 public class ThingJson {
 
@@ -18,7 +18,7 @@ public class ThingJson {
     private JSONObject mJsonObject;
 
     /**
-     * This constructor takes all mandatory fields to create a Thing object :
+     * This constructor takes all mandatory fields to create a ThingObject object :
      * @param thingId unique identifier of this object,
      * @param pict a string representation of the picture of the object
      * @param desc a small text description of the object
@@ -59,7 +59,7 @@ public class ThingJson {
     }
 
     /**
-     * Get a @{@link JSONObject} representing this Thing.
+     * Get a @{@link JSONObject} representing this ThingObject.
      * TODO : Isn't it leaking a reference to an internal object ?
      */
     public JSONObject getJson() {
