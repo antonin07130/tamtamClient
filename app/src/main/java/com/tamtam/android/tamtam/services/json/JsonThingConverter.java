@@ -1,33 +1,20 @@
-package com.tamtam.android.tamtam.services;
+package com.tamtam.android.tamtam.services.json;
 
 import android.util.JsonReader;
 import android.util.JsonWriter;
-import android.util.Log;
 
 import com.tamtam.android.tamtam.model.ThingObject;
 import com.tamtam.android.tamtam.model.ThingObject.PositionObject;
 import com.tamtam.android.tamtam.model.ThingObject.PriceObject;
 
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.HashSet;
-import java.util.Set;
-
-import static android.content.ContentValues.TAG;
-import static android.os.Build.ID;
-import static com.tamtam.android.tamtam.services.JsonUserConverter.INTERESTEDLIST_KEYNAME;
-import static com.tamtam.android.tamtam.services.JsonUserConverter.SELLINGLIST_KEYNAME;
 
 /**
  * Created by fcng1847 on 11/01/17.
  * This class implements a converter of {@link ThingObject} to/from Json {@link String}.
+ * This is the class to modify if the Json is modified in the future.
  */
-public class JsonThingConverter implements JsonToModelReader<String, ThingObject>, ModelToJsonWriter<ThingObject, String> {
+public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
     public static final String LOG_TAG = "JsonThingConverter";
 
     public static final String ID_KEYNAME = "thingId";
@@ -42,65 +29,7 @@ public class JsonThingConverter implements JsonToModelReader<String, ThingObject
     public static final String STUCK_KEYNAME = "stuck";
 
 
-    /**
-     * Reads a Json String and aextracts the first UserObject found.
-     * @param inputJson input Json String.
-     * @return the first {@link ThingObject} contained in inputJson or null if none was found.
-     */
-    @Override
-    public ThingObject fromJson(String inputJson) {
-        // "streamize" input String and setup a JsonReader on it
-        StringReader jsonStream = new StringReader(inputJson);
-        ThingObject parsedThing = null;
-        try {
-            parsedThing = readThingFromJsonStream(jsonStream);
-        } catch (IOException e){
-            Log.e(TAG, "fromJson: Parsing error with", e);
-        }
-        return parsedThing;
-    }
-
-    /**
-     * Writes a Json String containing the input Object
-     * @param inputModelObject {@link ThingObject} to convert to a Json String
-     * @return Json String encoding of the input UserObject
-     */
-    @Override
-    public String toJson(ThingObject inputModelObject) {
-        StringWriter jsonOutputStream = new StringWriter();
-        String resultJson = null;
-        try {
-            writeJsonStreamFromThing(jsonOutputStream, inputModelObject);
-            resultJson = jsonOutputStream.toString();
-        }catch (IOException e){
-            Log.e(TAG, "toJson: writing to json error", e);
-        }
-        return resultJson;
-    }
-
-
-    private void writeJsonStreamFromThing(Writer out, ThingObject modelObject) throws IOException {
-        JsonWriter writer = new JsonWriter(out);
-        //writer.setIndent("  ");
-        writeThing(writer, modelObject);
-        writer.close();
-    }
-
-    private void writePosition(JsonWriter writer, PositionObject position) throws IOException{
-        writer.beginObject();
-        writer.name(LONGITUDE_KEYNAME).value(position.getLongitude());
-        writer.name(LATITUDE_KEYNAME).value(position.getLatitude());
-        writer.endObject();
-    }
-
-    private void writePrice(JsonWriter writer, PriceObject price) throws IOException{
-        writer.beginObject();
-        writer.name(PRICE_KEYNAME).value(price.getPrice());
-        writer.name(CURRENCY_KEYNAME).value(price.getCurrency());
-        writer.endObject();
-    }
-
-    private void writeThing(JsonWriter writer, ThingObject thing) throws IOException {
+    protected void writeObject(JsonWriter writer, ThingObject thing) throws IOException {
         writer.beginObject();
         writer.name(ID_KEYNAME).value(thing.getThingId());
         writer.name(DESCRIPTION_KEYNAME).value(thing.getDescription());
@@ -113,16 +42,24 @@ public class JsonThingConverter implements JsonToModelReader<String, ThingObject
         writer.endObject();
     }
 
-    private ThingObject readThingFromJsonStream(Reader jsonStream) throws IOException{
-        JsonReader reader = new JsonReader(jsonStream);
-        try{
-            return readThing(reader);
-        } finally {
-            reader.close();
-        }
+
+    private void writePosition(JsonWriter writer, PositionObject position) throws IOException{
+        writer.beginObject();
+        writer.name(LONGITUDE_KEYNAME).value(position.getLongitude());
+        writer.name(LATITUDE_KEYNAME).value(position.getLatitude());
+        writer.endObject();
     }
 
-    private ThingObject readThing(JsonReader reader) throws IOException{
+
+    private void writePrice(JsonWriter writer, PriceObject price) throws IOException{
+        writer.beginObject();
+        writer.name(PRICE_KEYNAME).value(price.getPrice());
+        writer.name(CURRENCY_KEYNAME).value(price.getCurrency());
+        writer.endObject();
+    }
+
+
+    protected ThingObject readObject(JsonReader reader) throws IOException{
         ThingObject.ThingBuilder thingBuilder = new ThingObject.ThingBuilder();
 
         reader.beginObject();
@@ -146,8 +83,13 @@ public class JsonThingConverter implements JsonToModelReader<String, ThingObject
         }
         reader.endObject();
 
-        return thingBuilder.build();
+        if (thingBuilder.isValid()) {
+            return thingBuilder.build();
+        } else{
+            return null; // todo maybe we could throw an exception here ? but beware of empty Jsons
+        }
     }
+
 
     private PositionObject readPosition(JsonReader reader) throws IOException{
         double longitude = 0.;
@@ -196,18 +138,4 @@ public class JsonThingConverter implements JsonToModelReader<String, ThingObject
         else
             throw new IOException("PriceObject Json malformed");
     }
-
-
-    private Set<String> readStringArray(JsonReader reader) throws IOException{
-        Set<String> strings = new HashSet<String>();
-
-        reader.beginArray();
-        while (reader.hasNext()) {
-            strings.add(reader.nextString());
-        }
-        reader.endArray();
-
-        return strings;
-    }
-
 }

@@ -130,7 +130,7 @@ import static android.R.attr.name;
      */
     public static class ThingBuilder {
 
-        private String thingId;
+        private String thingId = "";
         private String pict;
         private String description;
         private PriceObject price;
@@ -167,29 +167,47 @@ import static android.R.attr.name;
             return this;
         }
         /**
-         * @param price the price of the thing (required) TODO : pass reference value or copy ?
+         * @param price the price of the thing (required)
          */
          public ThingBuilder price(PriceObject price) {
             this.price = price;
             return this;
         }
         /**
-         * @param position the current known position of the thing (required)TODO : pass reference value or copy ?
+         * @param position the current known position of the thing (required)
          */
          public ThingBuilder position(PositionObject position) {
             this.position = position;
             return this;
         }
         /**
-         * @param stuck true iff the thing is moving with the seller
+         * @param stuck true if the thing is moving with the seller
          */
          public ThingBuilder stuck(boolean stuck) {
             this.stuck = stuck;
             return this;
         }
 
+        /**
+         * Check that we can build a Thing Object with the provided arguments.
+         * thingId must not be empty,
+         * price must have been provided and
+         * position must have been provided.
+         * @return true if the builder is valid and we can build the ThingObject using build()
+         */
+        public boolean isValid() {
+            return (!thingId.isEmpty() && price != null && position != null);
+        }
+
+        /**
+         * Build a new {@link ThingObject} with information provided to {@link ThingBuilder}
+         * thingId must not be empty,
+         * price must have been provided and
+         * position must have been provided.
+         * @return a new immutable instance of {@link ThingObject}
+         */
          public ThingObject build(){
-             if (!thingId.isEmpty() && price != null && position != null) {
+             if (this.isValid() ) {
                  return new ThingObject(this);
              } else {
                  throw new IllegalArgumentException("thingId or price or position is null or empty");
@@ -229,6 +247,7 @@ import static android.R.attr.name;
     }
 
 
+    // todo : maybe enough to just verify ids ? Bad situation if ids are equals but not the rest
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -248,11 +267,11 @@ import static android.R.attr.name;
     @Override
     public int hashCode() {
         int result = thingId.hashCode();
-        result = 31 * result + (pict != null ? pict.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + price.hashCode();
-        result = 31 * result + position.hashCode();
-        result = 31 * result + (stuck ? 1 : 0);
+        //result = 31 * result + (pict != null ? pict.hashCode() : 0);
+        //result = 31 * result + (description != null ? description.hashCode() : 0);
+        //result = 31 * result + price.hashCode();
+        //result = 31 * result + position.hashCode();
+        //result = 31 * result + (stuck ? 1 : 0);
         return result;
     }
 }

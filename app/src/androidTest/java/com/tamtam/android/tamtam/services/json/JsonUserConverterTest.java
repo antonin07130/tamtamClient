@@ -1,24 +1,21 @@
-package com.tamtam.android.tamtam.services;
+package com.tamtam.android.tamtam.services.json;
 
 import com.tamtam.android.tamtam.model.UserObject;
+import com.tamtam.android.tamtam.services.json.JsonUserConverter;
 
-
-import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import static android.content.ContentValues.TAG;
 import static org.junit.Assert.*;
-import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 
 /**
@@ -32,11 +29,39 @@ public class JsonUserConverterTest {
             "\"sellingThings\":[\"thing3\",\"thing4\"]," +
             "\"interestedIn\":[\"thing1\",\"thing2\"]" +
             "}";
+    private static String jsonUserString2 = "{\"userId\":\"user2\"," +
+            "\"sellingThings\":[\"thing23\",\"thing24\"]," +
+            "\"interestedIn\":[\"thing21\",\"thing22\"]" +
+            "}";
+    private static String jsonUserString3 = "{\"userId\":\"user3\"," +
+            "\"sellingThings\":[\"thing33\",\"thing34\"]," +
+            "\"interestedIn\":[\"thing31\",\"thing32\"]" +
+            "}";
     private static UserObject userObject1 = new UserObject(
             "user1",
-            new HashSet<String>(Arrays.asList("thing1", "thing2")),
-            new HashSet<String>(Arrays.asList("thing3", "thing4")));
-    private JsonUserConverter jsonUserConverter;
+            Arrays.asList("thing1", "thing2"),
+            Arrays.asList("thing3", "thing4"));
+    private static UserObject userObject2 = new UserObject(
+            "user2",
+            Arrays.asList("thing21", "thing22"),
+            Arrays.asList("thing23", "thing24"));
+    private static UserObject userObject3 = new UserObject(
+            "user3",
+            Arrays.asList("thing31", "thing32"),
+            Arrays.asList("thing33", "thing34"));
+
+
+
+
+    private static String jsonUsersArray = "[" + jsonUserString1 + "," +
+                                                 jsonUserString2 + "," +
+                                                 jsonUserString3 + "]" ;
+
+    private static List<UserObject> userObjects =
+            Arrays.asList(userObject1, userObject2, userObject3);
+
+    private static JsonUserConverter jsonUserConverter;
+
 
     @Before
     public void constructor() throws Exception {
@@ -49,11 +74,12 @@ public class JsonUserConverterTest {
 
         assertEquals("user1", user1.getUserId());
 
+        // we convert Collections to hashsets because order does not matter
         assertEquals(new HashSet<String>(Arrays.asList("thing1", "thing2")),
-                     user1.getInterestedIn());
+                     new HashSet<String>(user1.getInterestedIn()));
 
         assertEquals(new HashSet<String>(Arrays.asList("thing3", "thing4")),
-                     user1.getSellingThings());
+                     new HashSet<String>(user1.getSellingThings()));
     }
 
     @Test
@@ -81,6 +107,38 @@ public class JsonUserConverterTest {
 
         assertEquals(userObject1, generatedUser);
     }
+
+
+    @Test
+    public void fromJsonArray() throws Exception{
+        List<UserObject> generatedThingsList = jsonUserConverter.fromJsonArray(jsonUsersArray);
+        assertEquals(userObjects, generatedThingsList);
+    }
+
+    @Test
+    public void fromEmptyJsonArray() throws Exception{
+        List<UserObject> emptyList = new ArrayList<UserObject>();
+        List<UserObject> generatedUsersList = jsonUserConverter.fromJsonArray("[]");
+        assertEquals(emptyList, generatedUsersList);
+    }
+
+    @Test
+    public void fromEmptyJson() throws Exception{
+        assertNull(jsonUserConverter.fromJson("{}"));
+    }
+
+    @Test
+    public void fromMalformedJsonArray() throws Exception{
+        assertNull(jsonUserConverter.fromJsonArray("[%*sdcccq]"));
+    }
+
+
+    @Test
+    public void fromMalformedJson() throws Exception{
+        assertNull(jsonUserConverter.fromJson("{toto%*sd:cccq}"));
+    }
+
+
 
     /***
      * ugly utility function to verify that a Json String is parsable
