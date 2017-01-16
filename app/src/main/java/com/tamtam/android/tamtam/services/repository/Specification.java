@@ -1,4 +1,4 @@
-package com.tamtam.android.tamtam.services;
+package com.tamtam.android.tamtam.services.repository;
 
 /**
  * Created by fcng1847 on 13/01/17.

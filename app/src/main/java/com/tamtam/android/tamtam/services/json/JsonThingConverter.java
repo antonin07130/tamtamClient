@@ -1,6 +1,7 @@
 package com.tamtam.android.tamtam.services.json;
 
 import android.util.JsonReader;
+import android.util.JsonToken;
 import android.util.JsonWriter;
 
 import com.tamtam.android.tamtam.model.ThingObject;
@@ -8,6 +9,7 @@ import com.tamtam.android.tamtam.model.ThingObject.PositionObject;
 import com.tamtam.android.tamtam.model.ThingObject.PriceObject;
 
 import java.io.IOException;
+import java.util.Currency;
 
 /**
  * Created by fcng1847 on 11/01/17.
@@ -53,40 +55,54 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
 
     private void writePrice(JsonWriter writer, PriceObject price) throws IOException{
         writer.beginObject();
-        writer.name(PRICE_KEYNAME).value(price.getPrice());
-        writer.name(CURRENCY_KEYNAME).value(price.getCurrency());
+        writer.name(PRICE_KEYNAME).value(price.getValue());
+        writer.name(CURRENCY_KEYNAME).value(price.getCurrency().getCurrencyCode());
         writer.endObject();
     }
 
 
     protected ThingObject readObject(JsonReader reader) throws IOException{
         ThingObject.ThingBuilder thingBuilder = new ThingObject.ThingBuilder();
+        boolean emptyJson = true;
 
         reader.beginObject();
+        if (reader.hasNext()) emptyJson = false;
         while(reader.hasNext()) {
             String name = reader.nextName();
             if (name.equals(ID_KEYNAME)) {
                 thingBuilder.thingId(reader.nextString());
+
             } else if (name.equals(POSITION_OBJ_KEYNAME)) {
                 thingBuilder.position(readPosition(reader));
+
             } else if (name.equals(PRICE_OBJ_KEYNAME)) {
                 thingBuilder.price(readPrice(reader));
-            } else if (name.equals(DESCRIPTION_KEYNAME)) {
+
+            } else if (name.equals(DESCRIPTION_KEYNAME) && reader.peek() != JsonToken.NULL) {
+                // we test for JsonToken.NULL because this is an optional parameter of UserObject
                 thingBuilder.description(reader.nextString());
-            } else if (name.equals(PICTURE_KEYNAME)) {
+
+            } else if (name.equals(PICTURE_KEYNAME) && reader.peek() != JsonToken.NULL) {
                 thingBuilder.pict(reader.nextString());
-            } else if (name.equals(STUCK_KEYNAME)) {
+
+            } else if (name.equals(STUCK_KEYNAME) && reader.peek() != JsonToken.NULL) {
                 thingBuilder.stuck(reader.nextBoolean());
+
             } else {
                 reader.skipValue();
+
             }
         }
         reader.endObject();
 
-        if (thingBuilder.isValid()) {
-            return thingBuilder.build();
+        // an option object to carry the reposne would have been more than welcome :
+        // 3 answers are possible : nothing, error, or valid_object
+        if (emptyJson) {
+            return null; // nothing
+        } else if (thingBuilder.isValid()) {
+            return thingBuilder.build(); // valid object
         } else{
-            return null; // todo maybe we could throw an exception here ? but beware of empty Jsons
+            throw new IOException("Unable to build a valid Thing from json"); // error
         }
     }
 
@@ -99,13 +115,19 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
         reader.beginObject();
         while(reader.hasNext()) {
             String name = reader.nextName();
-            if (name.equals(LONGITUDE_KEYNAME)) {
-                longitude = reader.nextDouble();
-                initialized_values++;
-            } else if (name.equals(LATITUDE_KEYNAME)) {
-                latitude = reader.nextDouble();
-                initialized_values++;
-            } else reader.skipValue();
+            switch (name) {
+                case LONGITUDE_KEYNAME:
+                    longitude = reader.nextDouble();
+                    initialized_values++;
+                    break;
+                case LATITUDE_KEYNAME:
+                    latitude = reader.nextDouble();
+                    initialized_values++;
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
+            }
         }
         reader.endObject();
 
@@ -118,24 +140,42 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
 
     private PriceObject readPrice(JsonReader reader) throws IOException{
         double price = 0.;
-        int currency = 0;
+        Currency currency = null;
         int initialized_values = 0;
+
         reader.beginObject();
         while(reader.hasNext()) {
             String name = reader.nextName();
-            if (name.equals(CURRENCY_KEYNAME)) {
-                currency = reader.nextInt();
-                initialized_values++;
-            } else if (name.equals(PRICE_KEYNAME)) {
-                price = reader.nextDouble();
-                initialized_values++;
-            } else reader.skipValue();
+            switch (name) {
+                case CURRENCY_KEYNAME:
+                    currency = readCurrency(reader.nextString());
+                    initialized_values++;
+                    break;
+                case PRICE_KEYNAME:
+                    price = reader.nextDouble();
+                    initialized_values++;
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
+            }
         }
         reader.endObject();
 
         if (initialized_values == 2)
-          return new PriceObject(currency, price);
+            return new PriceObject(currency, price);
         else
             throw new IOException("PriceObject Json malformed");
+    }
+
+
+    Currency readCurrency(String currencyCode) throws IOException{
+        try {
+            return Currency.getInstance(currencyCode);
+        }
+        catch (IllegalArgumentException e){
+            // chain illegal argument to IO exception (converter deals with IOExceptions)
+            throw new IOException("parsing price : invalid currency code", e);
+        }
     }
 }

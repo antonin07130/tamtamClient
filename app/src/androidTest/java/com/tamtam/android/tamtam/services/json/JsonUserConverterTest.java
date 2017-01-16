@@ -25,27 +25,27 @@ public class JsonUserConverterTest {
 
     //public String jsonThingString1 = "{\"thingId\":\"Thing1\",\"pict\":\"AAaaaIaAMaBASEa64aENCODEDaaaag==\",\"description\":\"cest un premier truc\",\"price\":{\"currency\":489,\"price\":60},\"position\":{\"lon\":7.05289,\"lat\":43.6166},\"stuck\":false}";
 
-    private static String jsonUserString1 = "{\"userId\":\"user1\"," +
+    private String jsonUserString1 = "{\"userId\":\"user1\"," +
             "\"sellingThings\":[\"thing3\",\"thing4\"]," +
             "\"interestedIn\":[\"thing1\",\"thing2\"]" +
             "}";
-    private static String jsonUserString2 = "{\"userId\":\"user2\"," +
+    private String jsonUserString2 = "{\"userId\":\"user2\"," +
             "\"sellingThings\":[\"thing23\",\"thing24\"]," +
             "\"interestedIn\":[\"thing21\",\"thing22\"]" +
             "}";
-    private static String jsonUserString3 = "{\"userId\":\"user3\"," +
+    private String jsonUserString3 = "{\"userId\":\"user3\"," +
             "\"sellingThings\":[\"thing33\",\"thing34\"]," +
             "\"interestedIn\":[\"thing31\",\"thing32\"]" +
             "}";
-    private static UserObject userObject1 = new UserObject(
+    private UserObject userObject1 = new UserObject(
             "user1",
             Arrays.asList("thing1", "thing2"),
             Arrays.asList("thing3", "thing4"));
-    private static UserObject userObject2 = new UserObject(
+    private UserObject userObject2 = new UserObject(
             "user2",
             Arrays.asList("thing21", "thing22"),
             Arrays.asList("thing23", "thing24"));
-    private static UserObject userObject3 = new UserObject(
+    private UserObject userObject3 = new UserObject(
             "user3",
             Arrays.asList("thing31", "thing32"),
             Arrays.asList("thing33", "thing34"));
@@ -53,14 +53,14 @@ public class JsonUserConverterTest {
 
 
 
-    private static String jsonUsersArray = "[" + jsonUserString1 + "," +
+    private String jsonUsersArray = "[" + jsonUserString1 + "," +
                                                  jsonUserString2 + "," +
                                                  jsonUserString3 + "]" ;
 
-    private static List<UserObject> userObjects =
+    private List<UserObject> userObjects =
             Arrays.asList(userObject1, userObject2, userObject3);
 
-    private static JsonUserConverter jsonUserConverter;
+    private JsonUserConverter jsonUserConverter;
 
 
     @Before
@@ -75,11 +75,11 @@ public class JsonUserConverterTest {
         assertEquals("user1", user1.getUserId());
 
         // we convert Collections to hashsets because order does not matter
-        assertEquals(new HashSet<String>(Arrays.asList("thing1", "thing2")),
-                     new HashSet<String>(user1.getInterestedIn()));
+        assertEquals(new HashSet<>(Arrays.asList("thing1", "thing2")),
+                     new HashSet<>(user1.getInterestedIn()));
 
-        assertEquals(new HashSet<String>(Arrays.asList("thing3", "thing4")),
-                     new HashSet<String>(user1.getSellingThings()));
+        assertEquals(new HashSet<>(Arrays.asList("thing3", "thing4")),
+                     new HashSet<>(user1.getSellingThings()));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class JsonUserConverterTest {
 
     @Test
     public void fromEmptyJsonArray() throws Exception{
-        List<UserObject> emptyList = new ArrayList<UserObject>();
+        List<UserObject> emptyList = new ArrayList<>();
         List<UserObject> generatedUsersList = jsonUserConverter.fromJsonArray("[]");
         assertEquals(emptyList, generatedUsersList);
     }
@@ -129,20 +129,32 @@ public class JsonUserConverterTest {
 
     @Test
     public void fromMalformedJsonArray() throws Exception{
-        assertNull(jsonUserConverter.fromJsonArray("[%*sdcccq]"));
+        try {
+            jsonUserConverter.fromJsonArray("[%*sdcccq]");
+            fail("Json reading exception should have been thrown");
+        }
+        catch(JsonToModelReaderException e){
+            assert(e.getMessage().contains("Reading json array"));
+        }
     }
 
 
     @Test
     public void fromMalformedJson() throws Exception{
-        assertNull(jsonUserConverter.fromJson("{toto%*sd:cccq}"));
+        try {
+            jsonUserConverter.fromJson("{toto%*sd:cccq}");
+            fail("Json reading exception should have been thrown");
+        }
+        catch(JsonToModelReaderException e){
+            assert(e.getMessage().contains("Reading json"));
+        }
     }
 
 
 
     /***
      * ugly utility function to verify that a Json String is parsable
-     * @param test
+     * @param test json String to verify.
      * @return true if parsable by {@link JSONObject} or {@link JSONArray}, false otherwise
      */
     boolean ParsableJson(String test) {

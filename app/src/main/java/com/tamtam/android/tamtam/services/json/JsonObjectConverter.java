@@ -1,8 +1,11 @@
 package com.tamtam.android.tamtam.services.json;
 
+import android.renderscript.RSInvalidStateException;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 import android.util.Log;
+
+import org.json.JSONException;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,6 +20,8 @@ import static android.content.ContentValues.TAG;
 
 /**
  * Created by antoninpa on 14/01/17.
+ * I used the following advices to throw/catch exceptions :
+ * http://softwareengineering.stackexchange.com/questions/231057/exceptions-why-throw-early-why-catch-late
  */
 
 /**
@@ -27,20 +32,19 @@ import static android.content.ContentValues.TAG;
  *  and {@link JsonUserConverter}.
  * @param <M> The Model Object's class to convert to/from Json
  */
-abstract class JsonObjectConverter<M> implements JsonToModelReader<String, M>, ModelToJsonWriter<M, String> {
+abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, JsonToModelReader<String, M> {
 
 
     @Override
-    public M fromJson(String inputJson) {
-        // "streamize" input String and setup a JsonReader on it
+    public M fromJson(String inputJson) throws JsonToModelReaderException{
+        // "serialize" input String and setup a JsonReader on it
         StringReader jsonStream = new StringReader(inputJson);
         JsonReader reader = new JsonReader(jsonStream);
         M parsedObject = null;
         try {
             parsedObject = readObject(reader);
         } catch (IOException e) {
-            Log.e(TAG, "fromJson: Parsing error with", e);
-            e.printStackTrace();
+            throw new JsonToModelReaderException("Reading json error", e);
         } finally {
             close(reader);
         }
@@ -49,25 +53,24 @@ abstract class JsonObjectConverter<M> implements JsonToModelReader<String, M>, M
 
 
     @Override
-    public List<M> fromJsonArray(String inputJsonArrayObject) {
-        // "streamize" input String and setup a JsonReader on it
+    public List<M> fromJsonArray(String inputJsonArrayObject) throws JsonToModelReaderException{
+        // "serialize" input String and setup a JsonReader on it
         StringReader jsonArrayStream = new StringReader(inputJsonArrayObject);
         JsonReader reader = new JsonReader(jsonArrayStream);
         List<M> parsedObjects = null;
         try {
             parsedObjects = readObjectArray(reader);
         } catch (IOException e) {
-            Log.e(TAG, "fromJson: Parsing error with", e);
-            e.printStackTrace();
+            throw new JsonToModelReaderException("Reading json array error", e);
         } finally{
-        close(reader);
+            close(reader);
         }
         return parsedObjects;
     }
 
 
     @Override
-    public String toJson(M inputModelObject) {
+    public String toJson(M inputModelObject) throws ModelToJsonWriterException {
         StringWriter jsonOutputStream = new StringWriter();
         JsonWriter writer = new JsonWriter(jsonOutputStream);
         String resultJson = null;
@@ -77,8 +80,7 @@ abstract class JsonObjectConverter<M> implements JsonToModelReader<String, M>, M
             writeObject(writer, inputModelObject);
             resultJson = jsonOutputStream.toString();
         } catch (IOException e) {
-            Log.e(TAG, "toJson: writing to json error", e);
-            e.printStackTrace();
+            throw new ModelToJsonWriterException("Writing to json error", e);
         } finally {
             close(writer);
         }
@@ -87,7 +89,7 @@ abstract class JsonObjectConverter<M> implements JsonToModelReader<String, M>, M
 
 
     @Override
-    public String toJsonArray(Iterable<M> inputModelObjects) {
+    public String toJsonArray(Iterable<M> inputModelObjects) throws ModelToJsonWriterException {
         StringWriter jsonOutputStream = new StringWriter();
         JsonWriter writer = new JsonWriter(jsonOutputStream);
         String resultJson = null;
@@ -96,7 +98,7 @@ abstract class JsonObjectConverter<M> implements JsonToModelReader<String, M>, M
             writeObjectsToArray(writer, inputModelObjects);
             resultJson = jsonOutputStream.toString();
         } catch (IOException e) {
-            Log.e(TAG, "toJson: writing to json error", e);
+            throw new ModelToJsonWriterException("Writing to json array error", e);
         } finally {
             close(writer);
         }
@@ -131,7 +133,6 @@ abstract class JsonObjectConverter<M> implements JsonToModelReader<String, M>, M
 
     private List<M> readObjectArray(JsonReader reader) throws IOException {
         List<M> messages = new ArrayList<>();
-
         reader.beginArray();
         while (reader.hasNext()) {
             messages.add(readObject(reader));

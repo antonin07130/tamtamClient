@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- * Created by fcng1847 on 11/01/17.
+ * Created by antoninpa on 11/01/17.
  * This class implements a converter of {@link UserObject} to/from Json {@link String}.
  * This is the class to modify if the Json is modified in the future.
  */
@@ -24,41 +24,50 @@ public class JsonUserConverter extends JsonObjectConverter<UserObject>  {
     protected void writeObject(JsonWriter writer, UserObject user) throws IOException {
         writer.beginObject();
         writer.name(ID_KEYNAME).value(user.getUserId());
-        if (user.getSellingThings() != null) {
+        if (user.getSellingThings() != null && user.getInterestedIn() != null) {
             writer.name(SELLINGLIST_KEYNAME);
             writeStringArray(writer, user.getSellingThings() );
-        }
-        if (user.getInterestedIn() != null) {
             writer.name(INTERESTEDLIST_KEYNAME);
             writeStringArray(writer, user.getInterestedIn());
+        } else {
+            throw new IOException("input UserObject invalid : a member collection is null"
+                    + user.toString());
         }
         writer.endObject();
     }
 
 
-    protected UserObject readObject(JsonReader reader) throws IOException{
+    protected UserObject readObject(JsonReader reader) throws IOException {
         String userId = null;
         Set<String> interestedIn = null;
         Set<String> sellingThings = null;
+        boolean emptyJson = true;
 
         reader.beginObject();
-        while(reader.hasNext()) {
+        if (reader.hasNext()) emptyJson = false;
+        while (reader.hasNext()) {
             String name = reader.nextName();
-            if (name.equals(ID_KEYNAME)) {
-                userId = reader.nextString();
-            } else if (name.equals(INTERESTEDLIST_KEYNAME)) {
-                interestedIn = readStringArray(reader);
-            } else if (name.equals(SELLINGLIST_KEYNAME)) {
-                sellingThings = readStringArray(reader);
-            } else {
-                reader.skipValue();
+            switch (name) {
+                case ID_KEYNAME:
+                    userId = reader.nextString();
+                    break;
+                case INTERESTEDLIST_KEYNAME:
+                    interestedIn = readStringArray(reader);
+                    break;
+                case SELLINGLIST_KEYNAME:
+                    sellingThings = readStringArray(reader);
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
             }
         }
         reader.endObject();
 
-        if (userId == null || userId.isEmpty()) {
+        if (emptyJson){
             return null;
-            //throw new IOException("no valid user found");
+        } else if (userId == null || userId.isEmpty()) {
+            throw new IOException("No valid user found in input String");
         } else {
             return new UserObject(userId, interestedIn, sellingThings);
         }
