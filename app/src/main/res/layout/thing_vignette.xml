@@ -20,7 +20,7 @@
             android:orientation="vertical"
             android:minHeight="50dp"
             android:padding="@dimen/activity_horizontal_margin"
-            tools:context="com.tamtam.android.tamtam.AroundMe">
+            tools:context="com.tamtam.android.tamtam.activities.AroundMe">
 
             <android.support.v7.widget.AppCompatImageView
                 android:id="@+id/vignette_thing_picture_iv"

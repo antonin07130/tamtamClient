@@ -1,6 +1,7 @@
-package com.tamtam.android.tamtam;
+package com.tamtam.android.tamtam.fragments;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,17 +13,22 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.AppCompatImageButton;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.tamtam.android.tamtam.R;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static android.R.attr.bitmap;
 import static android.app.Activity.RESULT_CANCELED;
 
 
@@ -32,22 +38,34 @@ import static android.app.Activity.RESULT_CANCELED;
 public class TakePictureFragment extends Fragment {
     private static final String TAG = "TakePictureFragment";
 
+    //*****************
+    // PICTURE STORAGE
+    //*****************
+
+
     // Path where photos are saved
     String mCurrentPhotoPath;
-    private static String CURRENT_PHOTOPATH_BUNDLEKEY = "current_photo_path";
+    // Bundle Key to store mCurrentPhotoPath in Bundles on fragment reloads
+    private static String M_CURRENT_PHOTO_PATH_BK = "m_current_photopath";
+    // Is a valid picture taken already
+    Boolean mValidPictureTaken = false;
+    private static String M_VALID_PICTURE_TAKEN_BK = "m_valid_picture_taken";
+    // Don't fully understand this... related to file prover and file sharing between camera and
+    // this application : todo : understand this
+    private static final String fileProviderAuthority = "com.tamtam.android.tamtam.fileprovider";
 
+    //*****************
+    // PICTURE CAPTURE
+    //*****************
     // request code for picture taking activity
-    // (only usefull if several intents are dispatched fom this)
+    // (only useful if several intents are dispatched fom this)
     static final int REQUEST_CODE_IMAGE_CAPTURE = 1;
 
-
-
+    //**************
+    // GUI ELEMENTS
+    //**************
     // the button to start pictures taking
     AppCompatImageButton mTakePictureIVBTN;
-
-
-    // don't fully understand this...
-    private static final String fileProviderAuthority = "com.tamtam.android.tamtam.fileprovider";
 
 
 
@@ -65,28 +83,31 @@ public class TakePictureFragment extends Fragment {
         mTakePictureIVBTN.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {sendTakePictureIntent();} });
 
-        // ugly hack to wait for imageview dimensions to be ready : NO CALLBACK IN THE FUCKING API !!!
-        fragmentView.post(new Runnable() {
-            @Override
-            public void run() {
-                setImageButtonSrcToPic(mCurrentPhotoPath); //height is ready
-            }
-        });
 
+        // if we recreate the view after a reorientation
+        if (savedInstanceState != null) {
+            // restore the taken photo in the button
+            mCurrentPhotoPath = savedInstanceState.getString(M_CURRENT_PHOTO_PATH_BK);
+            mValidPictureTaken = savedInstanceState.getBoolean(M_VALID_PICTURE_TAKEN_BK, false);
+            if (mValidPictureTaken) {
+                Log.d(TAG, "onCreateView: recreating view with a picture");
+                // ugly hack to wait for imageview dimensions to be computed to call getWidth etc.. :
+                // NO CALLBACK IN THE FUCKING API !!!
+                fragmentView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Layout is ready, we can use it :
+                        setImageButtonSrcToPic(mCurrentPhotoPath, mTakePictureIVBTN);
+                    }
+                });
+            } else {
+                Log.d(TAG, "onCreateView: recreating view but no picture taken yet");
+            }
+        }
         return fragmentView;
     }
 
 
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        // if we recreate the view after a reorientation
-        if (savedInstanceState != null){
-            // restore the taken photo in the button
-            mCurrentPhotoPath = savedInstanceState.getString(CURRENT_PHOTOPATH_BUNDLEKEY);
-        }
-    }
 
     public void sendTakePictureIntent(){
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -113,22 +134,31 @@ public class TakePictureFragment extends Fragment {
                 startActivityForResult(takePictureIntent, REQUEST_CODE_IMAGE_CAPTURE);
             }
     }
-    
-    
 
+
+    // Called immediately before onResume() (so after onStart()) : members are initialized.
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        
-        if (requestCode == REQUEST_CODE_IMAGE_CAPTURE){
-            setImageButtonSrcToPic(mCurrentPhotoPath); // display the picture instead of the button
-            Log.d(TAG, "onActivityResult: picture taken");
-        } else if (requestCode == RESULT_CANCELED ){
-            Log.d(TAG, "onActivityResult: picture activity canceled");
-        } else{
+
+        if (requestCode == REQUEST_CODE_IMAGE_CAPTURE) {
+            if (resultCode == Activity.RESULT_OK) {
+                mValidPictureTaken = true;
+                // Display the picture instead of the button
+                setImageButtonSrcToPic(mCurrentPhotoPath, mTakePictureIVBTN);
+                Log.d(TAG, "onActivityResult: picture taken");
+                Log.d(TAG, "onActivityResult: " + resultCode);
+            } else {
+                Log.d(TAG, "onActivityResult: picture activity canceled");
+                Toast.makeText(
+                        getContext(),
+                        getString(R.string.take_picture_fragment_photo_not_taken),
+                        Toast.LENGTH_LONG).show();
+            }
+        } else {
             Log.d(TAG, "onActivityResult: other un-managed activity result");
         }
-        
+
     }
 
     /**
@@ -142,7 +172,7 @@ public class TakePictureFragment extends Fragment {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir =  getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File imageFile = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -155,17 +185,33 @@ public class TakePictureFragment extends Fragment {
     }
 
 
-    private void setImageButtonSrcToPic(String currentPhotoPath) {
+    /**
+     * Resizes and applies the image at currentPhotoPath to the provided ImageView
+     * From Android doc :
+     * @see <a href="https://developer.android.com/training/camera/photobasics.html#TaskScalePhoto"></a>
+     * @param currentPhotoPath path of the image to add to imageView
+     * @param imageView imageView that will take the resized Photo as "src"
+     */
+    public void setImageButtonSrcToPic(final String currentPhotoPath, final ImageView imageView) {
 
-        if (currentPhotoPath == null) //silently do nothing if something is wrong
-                return;
+        Log.d(TAG, "setImageButtonSrcToPic: Trying to recompute photo Bitmap");
+        if (currentPhotoPath == null || currentPhotoPath.isEmpty()) {
+            Log.d(TAG, "setImageButtonSrcToPic: invalid currentPhotoPath");
+            return;
+        }
 
         // Get the dimensions of the View
-        int targetW = mTakePictureIVBTN.getWidth();
-        int targetH = mTakePictureIVBTN.getHeight();
+        int targetW = imageView.getWidth();
+        int targetH = imageView.getHeight();
 
+        // check if this function can safely compute image sizes
+        if (targetH == 0 || targetW ==0) {
+            Log.d(TAG, "setImageButtonSrcToPic: invalid imageView Width or Height (is Layout Ready?)");
+            return;
+        }
         // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        final BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        // Does not decode but only set bitmap metadata
         bmOptions.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
         int photoW = bmOptions.outWidth;
@@ -174,13 +220,17 @@ public class TakePictureFragment extends Fragment {
         // Determine how much to scale down the image
         int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
 
-        // Decode the image file into a Bitmap sized to fill the View
+        // Actually decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
+        //bmOptions.inBitmap = true;
 
+        Log.d(TAG, "setImageButtonSrcToPic: New Bitmap computed");
+        //bmOptions.inBitmap = true;
+        imageView.setImageDrawable(null);
         Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
-        mTakePictureIVBTN.setImageBitmap(bitmap);
+        imageView.setImageBitmap(bitmap);
     }
 
 
@@ -189,7 +239,8 @@ public class TakePictureFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(CURRENT_PHOTOPATH_BUNDLEKEY, mCurrentPhotoPath);
+        outState.putString(M_CURRENT_PHOTO_PATH_BK, mCurrentPhotoPath);
+        outState.putBoolean(M_VALID_PICTURE_TAKEN_BK, mValidPictureTaken);
     }
 
 

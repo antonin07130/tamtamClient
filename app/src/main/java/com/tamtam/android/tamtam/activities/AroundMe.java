@@ -1,19 +1,13 @@
-package com.tamtam.android.tamtam;
+package com.tamtam.android.tamtam.activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ListView;
 
-import com.tamtam.android.tamtam.model.ThingObject;
-import com.tamtam.android.tamtam.services.json.JsonThingConverter;
-import com.tamtam.android.tamtam.services.repository.FakeThingRepository;
-
-import java.util.List;
+import com.tamtam.android.tamtam.R;
+import com.tamtam.android.tamtam.fragments.ListThingsFragment;
 
 public class AroundMe extends AppCompatActivity {
 

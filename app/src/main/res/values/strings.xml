@@ -6,4 +6,12 @@
 
     <string name="sell_thing_take_picture">Take a picture</string>
 
+    <string name="take_picture_fragment_take_picture">Let\'s take a picture of the object</string>
+    <string name="take_picture_fragment_photo_not_taken">Please try again to take a picture</string>
+
+
+    <string name="record_price_fragment_ask_price">Tell your price</string>
+    <string name="record_price_fragment_price_text_hint">here</string>
+
+
 </resources>

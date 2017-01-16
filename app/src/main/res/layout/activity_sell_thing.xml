@@ -6,19 +6,29 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.tamtam.android.tamtam.SellThingActivity">
+    tools:context="com.tamtam.android.tamtam.activities.SellThingActivity">
 
-    <android.support.v7.widget.AppCompatImageButton
-        android:id="@+id/activity_sell_thing_picture_btn"
+    <FrameLayout
+        android:id="@+id/activity_sell_thing_take_picture_frame"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_weight="4"
+        tools:src="@mipmap/ic_launcher"
+        />
+    <FrameLayout
+        android:id="@+id/activity_sell_thing_record_price_frame"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_weight="1"
-        tools:src="@mipmap/ic_launcher"/>
+        android:layout_weight="4"
+        tools:src="@mipmap/ic_launcher"
+        />
 
     <android.support.v7.widget.AppCompatImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:src="@mipmap/ic_launcher"/>
+        android:layout_weight="1"
+        android:src="@mipmap/ic_launcher"/>
 </android.support.v7.widget.LinearLayoutCompat>
