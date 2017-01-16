@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- specifies authorized filepaths for FileProvider declared in AndroidManifest
+and used in TakePictureFragment -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path name="my_images" path="Android/data/com.tamtam.android.tamtam/files/Pictures" />
+</paths>

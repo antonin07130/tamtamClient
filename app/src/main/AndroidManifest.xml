@@ -2,19 +2,44 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tamtam.android.tamtam">
 
+    <!-- We need a camera to take pictures of Thing
+    (we may allow user without a camero who just want to buy ?) -->
+    <uses-feature android:name="android.hardware.camera"
+        android:required="true" />
+    <!-- For older Android versions to retrieve saved pictures -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AroundMe">
+        <activity android:name=".AroundMe"
+            android:label="@string/activity_label_around_me">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SellThingActivity"
+            android:label="@string/activity_label_sell_thing">
+        </activity>
+
+        <!-- To take pictures : For newer versions of Android,
+         we need a file provider to share files across applications
+         (camera and tamtam) -->
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.tamtam.android.tamtam.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
     </application>
 
 </manifest>

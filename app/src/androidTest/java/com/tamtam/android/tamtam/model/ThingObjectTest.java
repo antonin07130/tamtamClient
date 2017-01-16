@@ -7,7 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
+import java.util.Currency;
+
 import static org.junit.Assert.*;
 
 /**
@@ -35,7 +36,7 @@ public class ThingObjectTest {
                 .pict("base64encodedPicture")
                 .description("test description")
                 .position(positionObject)
-                .price(new ThingObject.PriceObject(400, 23.5))
+                .price(new ThingObject.PriceObject(Currency.getInstance("EUR"), 23.5))
                 .stuck(true)
                 .build();
 
@@ -54,8 +55,8 @@ public class ThingObjectTest {
     @Test
     public void getPrice() throws Exception {
         assertSame(ThingObject.PriceObject.class, testThingObject.getPrice().getClass());
-        assertEquals(testThingObject.getPrice().getCurrency(), 400);
-        assertEquals(testThingObject.getPrice().getPrice(), 23.5, 0.00001); //storing prices as double : bad idea anto..
+        assertEquals(testThingObject.getPrice().getCurrency(), Currency.getInstance("EUR"));
+        assertEquals(testThingObject.getPrice().getValue(), 23.5, 0.00001); //storing prices as double : bad idea anto..
     }
 
     @Test

@@ -18,8 +18,8 @@ public class UserObjectTest {
 
 
     UserObject userObject = null;
-    Set<String> interestSet = new HashSet(Arrays.asList("thing1,thing2"));
-    Set<String> sellingSet = new HashSet(Arrays.asList("thing3,thing4"));
+    Set<String> interestSet = new HashSet(Arrays.asList("thing1","thing2"));
+    Set<String> sellingSet = new HashSet(Arrays.asList("thing3","thing4"));
 
 
     @Before

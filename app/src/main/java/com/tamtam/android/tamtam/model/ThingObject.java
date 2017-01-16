@@ -4,9 +4,11 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
-
+import java.util.Currency;
 import static android.R.attr.name;
+
 
 /**
  * Created by antoninpa on 09/01/17.
@@ -29,11 +31,10 @@ import static android.R.attr.name;
 
     /**
      * This class represents a price and its currency.
-     * We sublcass directly {@link JSONObject}
      * todo : use android currency ? java.util.Currency;
      **/
      public static class PriceObject implements java.io.Serializable {
-        private final int currency;
+        private final Currency currency;
         private final double price;
 
         /**
@@ -41,12 +42,17 @@ import static android.R.attr.name;
          * @param currency : iso4217 code for this currency
          * @param price : price in the defined currency
          */
-         public PriceObject(int currency, double price) {
-            this.currency = currency;
-            this.price = price;
+         public PriceObject(Currency currency, double price) {
+             if (currency !=null) {
+                 this.currency = currency;
+                 this.price = price;
+             } else {
+                 throw new IllegalArgumentException("currency must be an iso4217 currency");
+             }
         }
-         public int getCurrency(){ return currency; }
-         public double getPrice(){ return price; }
+         public Currency getCurrency(){ return currency; }
+         public double getValue(){ return price; }
+
 
         @Override
         public boolean equals(Object o) {
@@ -55,8 +61,8 @@ import static android.R.attr.name;
 
             PriceObject that = (PriceObject) o;
 
-            if (currency != that.currency) return false;
-            return Double.compare(that.price, price) == 0;
+            if (Double.compare(that.price, price) != 0) return false;
+            return currency.equals(that.currency);
 
         }
 
@@ -64,7 +70,7 @@ import static android.R.attr.name;
         public int hashCode() {
             int result;
             long temp;
-            result = currency;
+            result = currency.hashCode();
             temp = Double.doubleToLongBits(price);
             result = 31 * result + (int) (temp ^ (temp >>> 32));
             return result;
@@ -73,9 +79,8 @@ import static android.R.attr.name;
 
     /**
      * This class represents a position (longitude, latitude)
-     * We sublcass directly {@link JSONObject}
      */
-     public static class PositionObject extends JSONObject{
+     public static class PositionObject implements java.io.Serializable{
         private final double longitude;
         private final double latitude;
         /**
@@ -229,6 +234,7 @@ import static android.R.attr.name;
         this.stuck = builder.stuck;
     }
 
+     public boolean hasPict() {return (this.pict != null);}
      public PositionObject getPosition(){return this.position;}
      public PriceObject getPrice(){return  this.price;}
      public String getThingId(){return this.thingId;}
@@ -238,14 +244,15 @@ import static android.R.attr.name;
 
     @Override
     public String toString() {
-        return super.toString() + "( thingId : " + this.thingId +
-                ", description : " + this.description +
-                ", position : " + this.position +
-                ", price : " + this.price +
-                ", stuck : " + this.stuck +
-                ", has pic : " + (this.pict != "") +" )";
+        return "ThingObject{" +
+                "thingId='" + thingId + '\'' +
+                ", pict='" + pict + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", position=" + position +
+                ", stuck=" + stuck +
+                '}';
     }
-
 
     // todo : maybe enough to just verify ids ? Bad situation if ids are equals but not the rest
     @Override
@@ -255,6 +262,7 @@ import static android.R.attr.name;
 
         ThingObject that = (ThingObject) o;
 
+        /*
         if (stuck != that.stuck) return false;
         if (!thingId.equals(that.thingId)) return false;
         if (pict != null ? !pict.equals(that.pict) : that.pict != null) return false;
@@ -262,7 +270,11 @@ import static android.R.attr.name;
             return false;
         if (!price.equals(that.price)) return false;
         return position.equals(that.position);
+        */
+        return thingId.equals(that.thingId);
     }
+
+
 
     @Override
     public int hashCode() {

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="activity_label_sell_thing">Sell something</string>
+    <string name="activity_label_around_me">Things around me</string>
+</resources>

@@ -35,9 +35,11 @@ public class UserObject{
 
     @Override
     public String toString() {
-        return super.toString() + "( userId : " + this.userId +
-                                  ", sellingThings : " + this.sellingThings +
-                                  ", interestedIn : " + this.interestedIn + " )";
+        return "UserObject{" +
+                "userId='" + userId + '\'' +
+                ", sellingThings=" + sellingThings +
+                ", interestedIn=" + interestedIn +
+                '}';
     }
 
     // todo : check if equality valid on generic hashmap (may use object's equal method instead)
