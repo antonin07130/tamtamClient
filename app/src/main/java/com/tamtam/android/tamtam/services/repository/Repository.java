@@ -3,7 +3,7 @@ package com.tamtam.android.tamtam.services.repository;
 import java.util.List;
 
 /**
- * Created by fcng1847 on 13/01/17.
+ * Created by antoninpa on 13/01/17.
  * following https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006#.nuiz2kz30
  * guidelines
  */
