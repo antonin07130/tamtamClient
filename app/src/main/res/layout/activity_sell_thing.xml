@@ -21,14 +21,21 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_weight="4"
+        android:layout_weight="2"
         tools:src="@mipmap/ic_launcher"
         />
-
+    <FrameLayout
+        android:id="@+id/activity_sell_thing_record_description_frame"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_weight="3"
+        tools:src="@mipmap/ic_launcher"
+        />
     <android.support.v7.widget.AppCompatImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="20dp"
         android:layout_weight="1"
         android:src="@mipmap/ic_launcher"/>
 </android.support.v7.widget.LinearLayoutCompat>

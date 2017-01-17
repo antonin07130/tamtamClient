@@ -1,0 +1,33 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:cardUseCompatPadding="true"
+    tools:context="com.tamtam.android.tamtam.fragments.RecordDescriptionFragment">
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/record_description_fragment_ask_description"
+            android:textAlignment="center" />
+
+        <EditText
+            android:id="@+id/fragment_record_description_description_et"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:minHeight="@dimen/edit_text_minimum_height"
+            android:minWidth="@dimen/edit_text_minimum_width"
+            android:textAlignment="center"
+            android:inputType="textAutoCorrect"
+            android:hint="@string/record_description_fragment_description_text_hint"
+            tools:text="15.21 $" />
+    </android.support.v7.widget.LinearLayoutCompat>
+
+</android.support.v7.widget.CardView>

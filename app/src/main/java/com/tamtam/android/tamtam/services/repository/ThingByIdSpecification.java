@@ -9,25 +9,19 @@ import java.net.URISyntaxException;
 
 public class ThingByIdSpecification implements TamTamServerSpecification {
 
-    private final String thingId;
     private final URI queryURI;
 
     @Override
     public URI toTamTamsQuery() {
-        return null;
+        return  queryURI;
     }
 
     ThingByIdSpecification(String thingId) {
         if (thingId == null || thingId.isEmpty()) {
             throw new IllegalArgumentException("thingId must not be null or empty");
         } else {
-            this.thingId = thingId;
             try {
-                this.queryURI = new URI(
-                        null,
-                        null,
-                        null,
-                        -1,
+                this.queryURI = new URI( null, null, null, -1,
                         "/things/" + thingId,
                         null, null);
             } catch (URISyntaxException e){
@@ -36,9 +30,5 @@ public class ThingByIdSpecification implements TamTamServerSpecification {
         }
     }
 
-    boolean isUrlSafe(String inputString) {
 
-
-        return false;
-    }
 }

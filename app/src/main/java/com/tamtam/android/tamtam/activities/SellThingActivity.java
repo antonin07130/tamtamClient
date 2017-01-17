@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.tamtam.android.tamtam.R;
+import com.tamtam.android.tamtam.fragments.RecordDescriptionFragment;
 import com.tamtam.android.tamtam.fragments.RecordPriceFragment;
 import com.tamtam.android.tamtam.fragments.TakePictureFragment;
 
@@ -35,6 +36,7 @@ public class SellThingActivity extends AppCompatActivity {
             // instantiate fragments for this activity
             TakePictureFragment takePictureFragment = new TakePictureFragment();
             RecordPriceFragment recordPriceFragment = new RecordPriceFragment();
+            RecordDescriptionFragment recordDescriptionFragment = new RecordDescriptionFragment();
 
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
@@ -45,6 +47,7 @@ public class SellThingActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.activity_sell_thing_take_picture_frame, takePictureFragment)
                     .add(R.id.activity_sell_thing_record_price_frame, recordPriceFragment)
+                    .add(R.id.activity_sell_thing_record_description_frame, recordDescriptionFragment)
                     .commit();
         }
     }

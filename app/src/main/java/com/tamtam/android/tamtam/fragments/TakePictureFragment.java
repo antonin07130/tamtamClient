@@ -43,10 +43,13 @@ public class TakePictureFragment extends Fragment {
     //*****************
 
 
-    // Path where photos are saved
-    String mCurrentPhotoPath;
+    // Path where the current photo is saved
+    String mCurrentPhotoPath = null;
+    // Path where the previous photo was saved
+    String mPreviousPhotoPath = null;
     // Bundle Key to store mCurrentPhotoPath in Bundles on fragment reloads
     private static String M_CURRENT_PHOTO_PATH_BK = "m_current_photopath";
+    private static String M_PREVIOUS_PHOTO_PATH_BK = "m_previous_photopath";
     // Is a valid picture taken already
     Boolean mValidPictureTaken = false;
     private static String M_VALID_PICTURE_TAKEN_BK = "m_valid_picture_taken";
@@ -87,8 +90,9 @@ public class TakePictureFragment extends Fragment {
         // if we recreate the view after a reorientation
         if (savedInstanceState != null) {
             // restore the taken photo in the button
-            mCurrentPhotoPath = savedInstanceState.getString(M_CURRENT_PHOTO_PATH_BK);
+            mCurrentPhotoPath = savedInstanceState.getString(M_CURRENT_PHOTO_PATH_BK, null);
             mValidPictureTaken = savedInstanceState.getBoolean(M_VALID_PICTURE_TAKEN_BK, false);
+            mPreviousPhotoPath = savedInstanceState.getString(M_PREVIOUS_PHOTO_PATH_BK, null);
             if (mValidPictureTaken) {
                 Log.d(TAG, "onCreateView: recreating view with a picture");
                 // ugly hack to wait for imageview dimensions to be computed to call getWidth etc.. :
@@ -144,12 +148,23 @@ public class TakePictureFragment extends Fragment {
         if (requestCode == REQUEST_CODE_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
                 mValidPictureTaken = true;
+
+                // we already had taken a picture : we discard it
+                if (mPreviousPhotoPath != null){
+                    Log.d(TAG, "onActivityResult: deleting previously taken photograph at "+ mPreviousPhotoPath);
+                    new File(mPreviousPhotoPath).delete();
+                    mPreviousPhotoPath = null;
+                }
+
                 // Display the picture instead of the button
                 setImageButtonSrcToPic(mCurrentPhotoPath, mTakePictureIVBTN);
                 Log.d(TAG, "onActivityResult: picture taken");
                 Log.d(TAG, "onActivityResult: " + resultCode);
             } else {
                 Log.d(TAG, "onActivityResult: picture activity canceled");
+                Log.d(TAG, "onActivityResult: deleting empty file at" + mCurrentPhotoPath);
+                new File(mCurrentPhotoPath).delete();
+                mCurrentPhotoPath = null;
                 Toast.makeText(
                         getContext(),
                         getString(R.string.take_picture_fragment_photo_not_taken),
@@ -178,6 +193,11 @@ public class TakePictureFragment extends Fragment {
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
+
+        // if we already had taken a picture in the past
+        if (mValidPictureTaken){
+            mPreviousPhotoPath = mCurrentPhotoPath;
+        }
 
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = imageFile.getAbsolutePath();
@@ -241,6 +261,7 @@ public class TakePictureFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putString(M_CURRENT_PHOTO_PATH_BK, mCurrentPhotoPath);
         outState.putBoolean(M_VALID_PICTURE_TAKEN_BK, mValidPictureTaken);
+        outState.putString(M_PREVIOUS_PHOTO_PATH_BK, mPreviousPhotoPath);
     }
 
 
