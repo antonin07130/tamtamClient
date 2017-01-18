@@ -26,8 +26,12 @@
             android:minWidth="@dimen/edit_text_minimum_width"
             android:textAlignment="center"
             android:inputType="numberDecimal"
+            android:maxLines="1"
             android:hint="@string/record_price_fragment_price_text_hint"
+            android:imeOptions="actionNext"
+            android:imeActionLabel="@string/record_price_fragment_keyboard_ok"
             tools:text="15.21 $" />
+
     </android.support.v7.widget.LinearLayoutCompat>
 
 </android.support.v7.widget.CardView>

@@ -75,6 +75,14 @@ import static android.R.attr.name;
             result = 31 * result + (int) (temp ^ (temp >>> 32));
             return result;
         }
+
+        @Override
+        public String toString() {
+            return "PriceObject{" +
+                    "currency=" + currency +
+                    ", price=" + price +
+                    '}';
+        }
     }
 
     /**
@@ -119,6 +127,14 @@ import static android.R.attr.name;
             temp = Double.doubleToLongBits(latitude);
             result = 31 * result + (int) (temp ^ (temp >>> 32));
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "PositionObject{" +
+                    "longitude=" + longitude +
+                    ", latitude=" + latitude +
+                    '}';
         }
     }
 

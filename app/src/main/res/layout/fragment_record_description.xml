@@ -26,6 +26,8 @@
             android:minWidth="@dimen/edit_text_minimum_width"
             android:textAlignment="center"
             android:inputType="textAutoCorrect"
+            android:maxLines="20"
+            android:imeOptions="actionNext"
             android:hint="@string/record_description_fragment_description_text_hint"
             tools:text="15.21 $" />
     </android.support.v7.widget.LinearLayoutCompat>

@@ -219,7 +219,11 @@ public class TakePictureFragment extends Fragment {
             Log.d(TAG, "setImageButtonSrcToPic: invalid currentPhotoPath");
             return;
         }
-
+        /*
+        imageView.setImageURI(FileProvider.getUriForFile(this.getContext(),
+                fileProviderAuthority,
+                new File(currentPhotoPath)));
+        */
         // Get the dimensions of the View
         int targetW = imageView.getWidth();
         int targetH = imageView.getHeight();
@@ -251,6 +255,7 @@ public class TakePictureFragment extends Fragment {
         imageView.setImageDrawable(null);
         Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
         imageView.setImageBitmap(bitmap);
+
     }
 
 
