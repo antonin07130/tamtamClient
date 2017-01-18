@@ -5,10 +5,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.tamtam.android.tamtam.R;
 
@@ -18,20 +21,30 @@ import com.tamtam.android.tamtam.R;
 public class RecordDescriptionFragment extends Fragment {
     private static final String TAG = "RecordDescr..Fragment";
 
+    // reference to the EditText contained in this fragment
+    // (validity on reloads not tested)
+    EditText mDescriptionEditText;
+    /**
+     * Empty constructor
+     */
     public RecordDescriptionFragment() { }
 
 
+    //******************************
+    // CALLBACKS WITH MAIN ACTIVITY
+    //******************************
+
     /**
      * This callback object usually points to container action that implements the
-     * callback method (see {@link RecordDescriptionFragment.OnPriceRecordedListener}).
+     * callback method (see {@link OnDescriptionRecordedListener}).
      */
-    RecordDescriptionFragment.OnPriceRecordedListener mCallback;
+    OnDescriptionRecordedListener mCallback;
 
     /**
      * This interface must be implemented by container activity.
      * It is through this interface that container activity can get the Price Value
      */
-    public interface OnPriceRecordedListener {
+    public interface OnDescriptionRecordedListener {
         /**
          * Callback to provide to container activity the price value
          * @param description text {@link String} created by this fragment.
@@ -39,13 +52,19 @@ public class RecordDescriptionFragment extends Fragment {
         public void onDescriptionRecorded(String description);
     }
 
+    /**
+     * Called by android system to
+     * setup callback with the host activity. If the callback is not defined in the host activity,
+     * an exception is raised.
+     * @param activityContext host activity (filled by the system)
+     */
     @Override
     public void onAttach(Context activityContext) {
         super.onAttach(activityContext);
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
-            mCallback = (RecordDescriptionFragment.OnPriceRecordedListener) activityContext;
+            mCallback = (OnDescriptionRecordedListener) activityContext;
         } catch (ClassCastException e) {
             throw new ClassCastException(activityContext.toString()
                     + " must implement OnDescriptionRecordedListener");
@@ -53,7 +72,30 @@ public class RecordDescriptionFragment extends Fragment {
     }
 
 
-    EditText mDescriptionEditText;
+    //**************************
+    // TEXT EDIT CALLBACK SETUP
+    //**************************
+
+    /**
+     * sets up a callback to the host activity when the input is "validated" by the user.
+     * @param watchedEditText EditText to watch, from where the value is read
+     * @param mainActivityListener Callback to reach the host activity
+     */
+    private void setUpTextEditCallback(final EditText watchedEditText, final OnDescriptionRecordedListener mainActivityListener) {
+        watchedEditText.setOnEditorActionListener(
+                new EditText.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        if (actionId == EditorInfo.IME_ACTION_SEND) {
+                            Log.d(TAG, "onEditorAction " + watchedEditText.getText().toString());
+                            String description = watchedEditText.getText().toString();
+                            mainActivityListener.onDescriptionRecorded(description);
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+    }
 
 
 
@@ -64,27 +106,12 @@ public class RecordDescriptionFragment extends Fragment {
         View fragmentView = inflater.inflate(R.layout.fragment_record_description, container, false);
 
         mDescriptionEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_description_description_et);
-        mDescriptionEditText.setOnClickListener(
-                new EditText.OnClickListener()
-                {
-                    public void onClick(View view)
-                    {
-                        mCallback.onDescriptionRecorded(mDescriptionEditText.getText().toString());
-                        Log.d(TAG, "onClick" + mDescriptionEditText.getText().toString());
-                    }
-                });
-
+        setUpTextEditCallback(mDescriptionEditText, mCallback);
 
         if (savedInstanceState != null) {
             // well do nothing...
         }
         return fragmentView;
 
-    }
-
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 }

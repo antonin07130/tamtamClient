@@ -2,13 +2,27 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tamtam.android.tamtam">
 
+    <!-- **********************************
+         * CAMERA PERMISSIONS AND FEATURES
+         **********************************
+     -->
+    <!-- For older Android versions to retrieve saved pictures -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
     <!-- We need a camera to take pictures of Thing
     (we may allow user without a camero who just want to buy ?) -->
     <uses-feature android:name="android.hardware.camera"
         android:required="true" />
-    <!-- For older Android versions to retrieve saved pictures -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
+
+    <!-- **********************************
+         * LOCATION PERMISSIONS AND FEATURES
+         **********************************
+     -->
+    <!-- For Android to be able to get a localization-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- For Android 21+ only :-->
+    <uses-feature android:name="android.hardware.location.network"/>
+
 
     <application
         android:allowBackup="true"

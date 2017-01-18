@@ -16,6 +16,11 @@ public class ThingByIdSpecification implements TamTamServerSpecification {
         return  queryURI;
     }
 
+    /**
+     * constructs a request to get a thing using its thingId.
+     * null or empty thingId are not allowed.
+     * @param thingId
+     */
     ThingByIdSpecification(String thingId) {
         if (thingId == null || thingId.isEmpty()) {
             throw new IllegalArgumentException("thingId must not be null or empty");
