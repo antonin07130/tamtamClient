@@ -22,14 +22,15 @@
             android:id="@+id/fragment_record_description_description_et"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:minHeight="@dimen/edit_text_minimum_height"
+            android:minHeight="100dp"
             android:minWidth="@dimen/edit_text_minimum_width"
-            android:textAlignment="center"
-            android:inputType="textAutoCorrect"
+            android:inputType="textMultiLine"
+            android:gravity="start|top"
             android:maxLines="20"
+            android:minLines="2"
             android:imeOptions="actionNext"
             android:hint="@string/record_description_fragment_description_text_hint"
-            tools:text="15.21 $" />
+            tools:text="This is an amazing thing blablabla..." />
     </android.support.v7.widget.LinearLayoutCompat>
 
 </android.support.v7.widget.CardView>

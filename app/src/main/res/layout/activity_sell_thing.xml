@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.LinearLayoutCompat
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+<android.support.v7.widget.LinearLayoutCompat
+
     android:id="@+id/activity_sell_thing"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="8000dp"
     tools:context="com.tamtam.android.tamtam.activities.SellThingActivity">
-
     <FrameLayout
         android:id="@+id/activity_sell_thing_take_picture_frame"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_weight="4"
+        android:layout_weight="6"
         tools:src="@mipmap/ic_launcher"
         />
     <FrameLayout
@@ -32,6 +36,14 @@
         android:layout_weight="3"
         tools:src="@mipmap/ic_launcher"
         />
+    <FrameLayout
+        android:id="@+id/activity_sell_thing_record_position_frame"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_weight="3"
+        tools:src="@mipmap/ic_launcher"
+        />
     <android.support.v7.widget.AppCompatImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,3 +51,4 @@
         android:layout_weight="1"
         android:src="@mipmap/ic_launcher"/>
 </android.support.v7.widget.LinearLayoutCompat>
+</ScrollView>

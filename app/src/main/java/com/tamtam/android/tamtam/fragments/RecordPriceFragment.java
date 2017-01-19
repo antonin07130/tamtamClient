@@ -37,9 +37,9 @@ public class RecordPriceFragment extends Fragment {
     public RecordPriceFragment() {}
 
 
-    //******************************
-    // CALLBACKS WITH MAIN ACTIVITY
-    //******************************
+    //*****************************
+    // CALLBACK WITH MAIN ACTIVITY
+    //*****************************
 
     /**
      * This callback object usually points to container action that implements the
@@ -93,8 +93,9 @@ public class RecordPriceFragment extends Fragment {
                 new EditText.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        if (actionId == EditorInfo.IME_ACTION_SEND) {
-                            Log.d(TAG, "onEditorAction " + watchedEditText.getText().toString());
+                        Log.d(TAG, "onEditorAction: actionNumber " + actionId);
+                        if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                            Log.d(TAG, "onEditorAction : value : " + watchedEditText.getText().toString());
                             String priceValueString = watchedEditText.getText().toString();
                             if (priceValueString.isEmpty()) {
                                 priceValueString = "0.";
@@ -121,9 +122,6 @@ public class RecordPriceFragment extends Fragment {
         mPriceValueEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_price_price_et);
         setUpTextEditCallback(mPriceValueEditText, mCallback);
 
-        if (savedInstanceState != null) {
-            // not much to save and restore here
-        }
         return fragmentView;
     }
 }

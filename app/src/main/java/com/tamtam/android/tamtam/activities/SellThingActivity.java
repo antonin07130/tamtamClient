@@ -1,5 +1,6 @@
 package com.tamtam.android.tamtam.activities;
 
+import android.location.Location;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,7 +16,8 @@ import com.tamtam.android.tamtam.model.ThingObject;
 
 public class SellThingActivity extends AppCompatActivity
         implements RecordPriceFragment.OnPriceRecordedListener,
-        RecordDescriptionFragment.OnDescriptionRecordedListener {
+                   RecordDescriptionFragment.OnDescriptionRecordedListener,
+                   RecordPositionFragment.OnPositionRecordedListener{
     private static final String TAG = "SellThingActivity";
 
     Fragment mTakePictureFragment,
@@ -25,6 +27,7 @@ public class SellThingActivity extends AppCompatActivity
 
     EditText mDescriptionEditText;
     EditText mPriceEditText;
+
     private static String M_DESCRIPTION_EDITTEXT_BK = "description_edittext";
     private static String M_PICE_EDITTEXT_BK = "price_edittext";
 
@@ -66,7 +69,7 @@ public class SellThingActivity extends AppCompatActivity
                     .add(R.id.activity_sell_thing_take_picture_frame, mTakePictureFragment)
                     .add(R.id.activity_sell_thing_record_price_frame, mRecordPriceFragment)
                     .add(R.id.activity_sell_thing_record_description_frame, mRecordDescriptionFragment)
-                    .add(R.id.fragment_record_price_price_et, mRecordPositionFragment)
+                    .add(R.id.activity_sell_thing_record_position_frame, mRecordPositionFragment)
                     .commit();
         }
     }
@@ -75,18 +78,11 @@ public class SellThingActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        setUpFocus();
-    }
-
-    /**
-     * Setup tab order for textedits focus to chain when validating.
-     */
-    private void setUpFocus(){
         mPriceEditText = (EditText) findViewById(R.id.fragment_record_price_price_et);
         mDescriptionEditText = (EditText)findViewById(R.id.fragment_record_description_description_et);
-        mPriceEditText.setNextFocusDownId(R.id.fragment_record_description_description_et);
-    }
+        mPriceEditText.requestFocus();
 
+    }
 
 
 
@@ -97,11 +93,19 @@ public class SellThingActivity extends AppCompatActivity
     @Override
     public void onPriceRecorded(ThingObject.PriceObject priceObject) {
         Log.d(TAG, "onPriceRecorded: got PriceObject :" + priceObject);
+        mPriceEditText.clearFocus();
         mDescriptionEditText.requestFocus();
     }
 
     @Override
     public void onDescriptionRecorded(String description) {
         Log.d(TAG, "onDescriptionRecorded: got Description" + description);
+        mPriceEditText.clearFocus();
+        mDescriptionEditText.clearFocus();
+    }
+
+    @Override
+    public void onPositionRecorded(Location location) {
+        Log.d(TAG, "onPositionRecorded: got location" + location);
     }
 }

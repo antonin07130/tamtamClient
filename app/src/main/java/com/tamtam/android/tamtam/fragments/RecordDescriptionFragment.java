@@ -37,16 +37,17 @@ public class RecordDescriptionFragment extends Fragment {
     /**
      * This callback object usually points to container action that implements the
      * callback method (see {@link OnDescriptionRecordedListener}).
+     * it is used by the fragment to transmit data to the host activity.
      */
     OnDescriptionRecordedListener mCallback;
 
     /**
      * This interface must be implemented by container activity.
-     * It is through this interface that container activity can get the Price Value
+     * It is through this interface that container activity can get the description {@link String}.
      */
     public interface OnDescriptionRecordedListener {
         /**
-         * Callback to provide to container activity the price value
+         * Callback to provide to container activity the description {@link String}
          * @param description text {@link String} created by this fragment.
          */
         public void onDescriptionRecorded(String description);
@@ -86,8 +87,9 @@ public class RecordDescriptionFragment extends Fragment {
                 new EditText.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        if (actionId == EditorInfo.IME_ACTION_SEND) {
-                            Log.d(TAG, "onEditorAction " + watchedEditText.getText().toString());
+                        Log.d(TAG, "onEditorAction: actionNumber " + actionId);
+                        if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                            Log.d(TAG, "onEditorAction : value" + watchedEditText.getText().toString());
                             String description = watchedEditText.getText().toString();
                             mainActivityListener.onDescriptionRecorded(description);
                             return true;
@@ -108,10 +110,6 @@ public class RecordDescriptionFragment extends Fragment {
         mDescriptionEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_description_description_et);
         setUpTextEditCallback(mDescriptionEditText, mCallback);
 
-        if (savedInstanceState != null) {
-            // well do nothing...
-        }
         return fragmentView;
-
     }
 }

@@ -17,16 +17,18 @@
             android:id="@+id/fragment_take_picture_ivbtn"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:minHeight="200dp"
             android:layout_gravity="center"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:layout_weight="5"
+            android:layout_weight="1"
             android:scaleType="centerInside"
             android:src="@drawable/ic_camera" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:text="@string/take_picture_fragment_take_picture"
             android:textAlignment="center" />

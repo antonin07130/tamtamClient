@@ -38,7 +38,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.SellThingActivity"
-            android:label="@string/activity_label_sell_thing">
+            android:label="@string/activity_label_sell_thing"
+            android:windowSoftInputMode="stateHidden">
+
         </activity>
 
         <!-- To take pictures : For newer versions of Android,
