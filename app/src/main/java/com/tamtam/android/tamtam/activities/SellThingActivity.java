@@ -80,7 +80,7 @@ public class SellThingActivity extends AppCompatActivity
         super.onStart();
         mPriceEditText = (EditText) findViewById(R.id.fragment_record_price_price_et);
         mDescriptionEditText = (EditText)findViewById(R.id.fragment_record_description_description_et);
-        mPriceEditText.requestFocus();
+        mPriceEditText.isFocusable();
 
     }
 
@@ -93,15 +93,15 @@ public class SellThingActivity extends AppCompatActivity
     @Override
     public void onPriceRecorded(ThingObject.PriceObject priceObject) {
         Log.d(TAG, "onPriceRecorded: got PriceObject :" + priceObject);
-        mPriceEditText.clearFocus();
+        mPriceEditText.setFocusable(false);
         mDescriptionEditText.requestFocus();
     }
 
     @Override
     public void onDescriptionRecorded(String description) {
         Log.d(TAG, "onDescriptionRecorded: got Description" + description);
-        mPriceEditText.clearFocus();
-        mDescriptionEditText.clearFocus();
+        //mDescriptionEditText.
+
     }
 
     @Override

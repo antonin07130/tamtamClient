@@ -24,7 +24,9 @@ import java.util.Currency;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RecordPriceFragment extends Fragment {
+public class RecordPriceFragment extends Fragment implements
+        EditText.OnEditorActionListener // for TextEdit callbacks
+{
     private static final String TAG = "RecordPriceFragment";
 
     // reference to the EditText contained in this fragment
@@ -79,38 +81,36 @@ public class RecordPriceFragment extends Fragment {
     }
 
 
-    //**************************
-    // TEXT EDIT CALLBACK SETUP
-    //**************************
+    //********************
+    // TEXT EDIT CALLBACK
+    //********************
+
 
     /**
-     * sets up a callback to the host activity when the input is "validated" by the user.
-     * @param watchedEditText EditText to watch, from where the value is read
-     * @param mainActivityListener Callback to reach the host activity
+     * Callback when our {@link EditText} receives an action to record inputs and send it to host activity
+     * using mCallback.onPriceRecorded
+     * @param v the {@link EditText} that received an action
+     * @param actionId the aciton id (check IME action in layout)
+     * @param event not used
+     * @return true if we use the event and don't want it to be propagated elsewhere. false otherwise.
      */
-    private void setUpTextEditCallback(final EditText watchedEditText, final OnPriceRecordedListener mainActivityListener) {
-        watchedEditText.setOnEditorActionListener(
-                new EditText.OnEditorActionListener() {
-                    @Override
-                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        Log.d(TAG, "onEditorAction: actionNumber " + actionId);
-                        if (actionId == EditorInfo.IME_ACTION_NEXT) {
-                            Log.d(TAG, "onEditorAction : value : " + watchedEditText.getText().toString());
-                            String priceValueString = watchedEditText.getText().toString();
-                            if (priceValueString.isEmpty()) {
-                                priceValueString = "0.";
-                            }
-                            mainActivityListener.onPriceRecorded(
-                                    new PriceObject(
-                                            Currency.getInstance("EUR"),
-                                            Double.parseDouble(priceValueString)));
-                            return true;
-                        }
-                        return false;
-                    }
-                });
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        Log.d(TAG, "onEditorAction: actionNumber " + actionId);
+        if (actionId == EditorInfo.IME_ACTION_NEXT) {
+            Log.d(TAG, "onEditorAction : value : " + v.getText().toString());
+            String priceValueString = v.getText().toString();
+            if (priceValueString.isEmpty()) {
+                priceValueString = "0.";
+            }
+            mCallback.onPriceRecorded(
+                    new PriceObject(
+                            Currency.getInstance("EUR"),
+                            Double.parseDouble(priceValueString)));
+            return true;
+        }
+        return false;
     }
-
 
 
     @Override
@@ -120,7 +120,7 @@ public class RecordPriceFragment extends Fragment {
         View fragmentView = inflater.inflate(R.layout.fragment_record_price, container, false);
 
         mPriceValueEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_price_price_et);
-        setUpTextEditCallback(mPriceValueEditText, mCallback);
+        mPriceValueEditText.setOnEditorActionListener(this);
 
         return fragmentView;
     }

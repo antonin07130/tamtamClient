@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -18,16 +20,25 @@ import com.tamtam.android.tamtam.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RecordDescriptionFragment extends Fragment {
+public class RecordDescriptionFragment extends Fragment implements
+        EditText.OnEditorActionListener, // for EditText callbacks
+        Button.OnClickListener
+{
+
     private static final String TAG = "RecordDescr..Fragment";
 
-    // reference to the EditText contained in this fragment
-    // (validity on reloads not tested)
+    public RecordDescriptionFragment() {}
+
     EditText mDescriptionEditText;
+    Button mButtonValidate;
+
     /**
-     * Empty constructor
+     * This callback object usually points to container action that implements the
+     * callback method (see {@link OnDescriptionRecordedListener}).
      */
-    public RecordDescriptionFragment() { }
+    OnDescriptionRecordedListener mCallback;
+
+
 
 
     //******************************
@@ -35,30 +46,17 @@ public class RecordDescriptionFragment extends Fragment {
     //******************************
 
     /**
-     * This callback object usually points to container action that implements the
-     * callback method (see {@link OnDescriptionRecordedListener}).
-     * it is used by the fragment to transmit data to the host activity.
-     */
-    OnDescriptionRecordedListener mCallback;
-
-    /**
      * This interface must be implemented by container activity.
-     * It is through this interface that container activity can get the description {@link String}.
+     * It is through this interface that container activity can get the Price Value
      */
     public interface OnDescriptionRecordedListener {
         /**
-         * Callback to provide to container activity the description {@link String}
+         * Callback to provide to container activity the price value
          * @param description text {@link String} created by this fragment.
          */
         public void onDescriptionRecorded(String description);
     }
 
-    /**
-     * Called by android system to
-     * setup callback with the host activity. If the callback is not defined in the host activity,
-     * an exception is raised.
-     * @param activityContext host activity (filled by the system)
-     */
     @Override
     public void onAttach(Context activityContext) {
         super.onAttach(activityContext);
@@ -73,32 +71,39 @@ public class RecordDescriptionFragment extends Fragment {
     }
 
 
-    //**************************
-    // TEXT EDIT CALLBACK SETUP
-    //**************************
 
-    /**
-     * sets up a callback to the host activity when the input is "validated" by the user.
-     * @param watchedEditText EditText to watch, from where the value is read
-     * @param mainActivityListener Callback to reach the host activity
-     */
-    private void setUpTextEditCallback(final EditText watchedEditText, final OnDescriptionRecordedListener mainActivityListener) {
-        watchedEditText.setOnEditorActionListener(
-                new EditText.OnEditorActionListener() {
-                    @Override
-                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        Log.d(TAG, "onEditorAction: actionNumber " + actionId);
-                        if (actionId == EditorInfo.IME_ACTION_NEXT) {
-                            Log.d(TAG, "onEditorAction : value" + watchedEditText.getText().toString());
-                            String description = watchedEditText.getText().toString();
-                            mainActivityListener.onDescriptionRecorded(description);
-                            return true;
-                        }
-                        return false;
-                    }
-                });
+    //*******************
+    // TEXTEDIT CALLBACK
+    //*******************
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_SEND) {
+            Log.d(TAG, "onEditorAction " + v.getText().toString());
+            String description = v.getText().toString();
+            mCallback.onDescriptionRecorded(description);
+
+            return true;
+        }
+        return false;
     }
 
+    //*****************
+    // BUTTON CALLBACK
+    //*****************
+
+    @Override
+    public void onClick(View v) {
+        // call the same callback that is called by the virtual keyboard with "IME action"
+        mDescriptionEditText.onEditorAction(EditorInfo.IME_ACTION_SEND);
+        
+        // complex set of commands to hide the virtual keyboard.
+        InputMethodManager imm =
+                (InputMethodManager) this.getContext().
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+    }
 
 
     @Override
@@ -107,9 +112,22 @@ public class RecordDescriptionFragment extends Fragment {
         // Inflate the layout for this fragment
         View fragmentView = inflater.inflate(R.layout.fragment_record_description, container, false);
 
+        // wire callback between controls and this.
         mDescriptionEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_description_description_et);
-        setUpTextEditCallback(mDescriptionEditText, mCallback);
+        mDescriptionEditText.setOnEditorActionListener(this);
+        mButtonValidate = (Button) fragmentView.findViewById(R.id.fragment_record_description_validate_btn);
+        mButtonValidate.setOnClickListener(this);
 
+        if (savedInstanceState != null) {
+            // well do nothing...
+        }
         return fragmentView;
+
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 }

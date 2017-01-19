@@ -20,6 +20,7 @@
     <!-- fragment_record_description -->
     <string name="record_description_fragment_ask_description">Tell more about this Thing</string>
     <string name="record_description_fragment_description_text_hint">here</string>
+    <string name="record_description_fragment_button_text">OK</string>
 
     <!-- fragment_record_position -->
     <string name="record_position_fragment_ask_position">Where is this thing ?</string>
