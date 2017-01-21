@@ -133,7 +133,7 @@ public class JsonUserConverterTest {
             jsonUserConverter.fromJsonArray("[%*sdcccq]");
             fail("Json reading exception should have been thrown");
         }
-        catch(JsonToModelReaderException e){
+        catch(MappingException e){
             assert(e.getMessage().contains("Reading json array"));
         }
     }
@@ -145,7 +145,7 @@ public class JsonUserConverterTest {
             jsonUserConverter.fromJson("{toto%*sd:cccq}");
             fail("Json reading exception should have been thrown");
         }
-        catch(JsonToModelReaderException e){
+        catch(MappingException e){
             assert(e.getMessage().contains("Reading json"));
         }
     }

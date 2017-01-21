@@ -1,11 +1,8 @@
 package com.tamtam.android.tamtam.services.json;
 
-import android.renderscript.RSInvalidStateException;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 import android.util.Log;
-
-import org.json.JSONException;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -32,11 +29,11 @@ import static android.content.ContentValues.TAG;
  *  and {@link JsonUserConverter}.
  * @param <M> The Model Object's class to convert to/from Json
  */
-abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, JsonToModelReader<String, M> {
+abstract class JsonObjectConverter<M> implements Mapper<String, M> {
 
 
     @Override
-    public M fromJson(String inputJson) throws JsonToModelReaderException{
+    public M fromJson(String inputJson) throws MappingException{
         // "serialize" input String and setup a JsonReader on it
         StringReader jsonStream = new StringReader(inputJson);
         JsonReader reader = new JsonReader(jsonStream);
@@ -44,7 +41,7 @@ abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, J
         try {
             parsedObject = readObject(reader);
         } catch (IOException e) {
-            throw new JsonToModelReaderException("Reading json error", e);
+            throw new MappingException("Reading json error", e);
         } finally {
             close(reader);
         }
@@ -53,7 +50,7 @@ abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, J
 
 
     @Override
-    public List<M> fromJsonArray(String inputJsonArrayObject) throws JsonToModelReaderException{
+    public List<M> fromJsonArray(String inputJsonArrayObject) throws MappingException{
         // "serialize" input String and setup a JsonReader on it
         StringReader jsonArrayStream = new StringReader(inputJsonArrayObject);
         JsonReader reader = new JsonReader(jsonArrayStream);
@@ -61,7 +58,7 @@ abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, J
         try {
             parsedObjects = readObjectArray(reader);
         } catch (IOException e) {
-            throw new JsonToModelReaderException("Reading json array error", e);
+            throw new MappingException("Reading json array error", e);
         } finally{
             close(reader);
         }
@@ -70,7 +67,7 @@ abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, J
 
 
     @Override
-    public String toJson(M inputModelObject) throws ModelToJsonWriterException {
+    public String toJson(M inputModelObject) throws MappingException {
         StringWriter jsonOutputStream = new StringWriter();
         JsonWriter writer = new JsonWriter(jsonOutputStream);
         String resultJson = null;
@@ -80,7 +77,7 @@ abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, J
             writeObject(writer, inputModelObject);
             resultJson = jsonOutputStream.toString();
         } catch (IOException e) {
-            throw new ModelToJsonWriterException("Writing to json error", e);
+            throw new MappingException("Writing to json error", e);
         } finally {
             close(writer);
         }
@@ -89,7 +86,7 @@ abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, J
 
 
     @Override
-    public String toJsonArray(Iterable<M> inputModelObjects) throws ModelToJsonWriterException {
+    public String toJsonArray(Iterable<M> inputModelObjects) throws MappingException {
         StringWriter jsonOutputStream = new StringWriter();
         JsonWriter writer = new JsonWriter(jsonOutputStream);
         String resultJson = null;
@@ -98,7 +95,7 @@ abstract class JsonObjectConverter<M> implements ModelToJsonWriter<M, String>, J
             writeObjectsToArray(writer, inputModelObjects);
             resultJson = jsonOutputStream.toString();
         } catch (IOException e) {
-            throw new ModelToJsonWriterException("Writing to json array error", e);
+            throw new MappingException("Writing to json array error", e);
         } finally {
             close(writer);
         }

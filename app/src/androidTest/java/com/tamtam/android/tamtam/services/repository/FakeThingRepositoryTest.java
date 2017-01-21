@@ -3,15 +3,12 @@ package com.tamtam.android.tamtam.services.repository;
 import com.tamtam.android.tamtam.JsonThingTestData;
 import com.tamtam.android.tamtam.model.ThingObject;
 import com.tamtam.android.tamtam.services.json.JsonThingConverter;
-import com.tamtam.android.tamtam.services.json.JsonToModelReader;
-import com.tamtam.android.tamtam.services.json.JsonToModelReaderException;
+import com.tamtam.android.tamtam.services.json.MappingException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -27,7 +24,7 @@ public class FakeThingRepositoryTest {
     ThingObject thing2 = thingConverter.fromJson(JsonThingTestData.JSON_THING_STRING_2);
     ThingObject thing3 = thingConverter.fromJson(JsonThingTestData.JSON_THING_STRING_3);
 
-    public FakeThingRepositoryTest() throws JsonToModelReaderException {
+    public FakeThingRepositoryTest() throws MappingException {
     }
 
 

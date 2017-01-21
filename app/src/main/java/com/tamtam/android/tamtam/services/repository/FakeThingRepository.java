@@ -1,10 +1,8 @@
 package com.tamtam.android.tamtam.services.repository;
 
 import com.tamtam.android.tamtam.model.ThingObject;
-import com.tamtam.android.tamtam.services.json.JsonToModelReader;
-import com.tamtam.android.tamtam.services.json.JsonToModelReaderException;
-import com.tamtam.android.tamtam.services.json.ModelToJsonWriter;
-import com.tamtam.android.tamtam.services.json.ModelToJsonWriterException;
+import com.tamtam.android.tamtam.services.json.Mapper;
+import com.tamtam.android.tamtam.services.json.MappingException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +15,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FakeThingRepository implements Repository<ThingObject> {
 
     // conversion services (to/from json string) like in the real implementation.
-    final JsonToModelReader<String, ThingObject> jsonToModel;
-    final ModelToJsonWriter<ThingObject, String> modelToJson;
+    final Mapper<String, ThingObject> jsonToModel;
+
+
+    // normal simultaneous access
+    private static int SIMULTANEOUS_ACCESSES = 4;
 
     // static in memory collection to simulate a database (may be ugly)
     // it stores json Strings to look like real network request results
-    final static ConcurrentHashMap<String, String> inMemoryJsonThings = new ConcurrentHashMap<>();
+    private final static ConcurrentHashMap<String, String> inMemoryJsonThings =
+            new ConcurrentHashMap<>(SIMULTANEOUS_ACCESSES);
 
     //constant strings
     public static final String JSON_THING_STRING_1 = "{\"thingId\":\"thing1\"," +
@@ -45,10 +47,8 @@ public class FakeThingRepository implements Repository<ThingObject> {
             "\"stuck\":false}";
 
 
-    public FakeThingRepository(JsonToModelReader<String, ThingObject> jsonToModel,
-                               ModelToJsonWriter<ThingObject, String> modelToJson) {
+    public FakeThingRepository(Mapper<String, ThingObject> jsonToModel) {
         this.jsonToModel = jsonToModel;
-        this.modelToJson = modelToJson;
     }
 
 
@@ -61,7 +61,7 @@ public class FakeThingRepository implements Repository<ThingObject> {
                     JSON_THING_STRING_2);
             inMemoryJsonThings.put(jsonToModel.fromJson(JSON_THING_STRING_1).getThingId(),
                     JSON_THING_STRING_1);
-        } catch (JsonToModelReaderException e) {
+        } catch (MappingException e) {
             e.printStackTrace();
         }
     }
@@ -74,7 +74,7 @@ public class FakeThingRepository implements Repository<ThingObject> {
             for (String jsonValue : inMemoryJsonThings.values()) {
                 objectList.add(jsonToModel.fromJson(jsonValue));
             }
-        } catch (JsonToModelReaderException e) {
+        } catch (MappingException e) {
             e.printStackTrace();
         }
 
@@ -88,7 +88,7 @@ public class FakeThingRepository implements Repository<ThingObject> {
         if (jsonObject != null) {
             try {
                 thing = jsonToModel.fromJson(jsonObject);
-            } catch (JsonToModelReaderException e) {
+            } catch (MappingException e) {
                 e.printStackTrace();
             }
         }
@@ -114,8 +114,8 @@ public class FakeThingRepository implements Repository<ThingObject> {
     @Override
     public void add(ThingObject item) {
         try {
-            inMemoryJsonThings.put(item.getThingId(), modelToJson.toJson(item));
-        } catch (ModelToJsonWriterException e) {
+            inMemoryJsonThings.put(item.getThingId(), jsonToModel.toJson(item));
+        } catch (jsonToModelWriterException e) {
             e.printStackTrace();
         }
     }

@@ -175,9 +175,9 @@ public class JsonThingConverterTest {
     public void fromMalformedJsonArray() throws Exception{
         try {
             List<ThingObject> things = jsonThingConverter.fromJsonArray("[%*sdcccq]");
-            fail("Should throw a JsonToModelReaderException when attempting to parse malformed Json");
+            fail("Should throw a MappingException when attempting to parse malformed Json");
         }
-        catch(JsonToModelReaderException e){
+        catch(MappingException e){
             assert(e.getMessage().contains("Reading json array"));
         }
     }
@@ -187,9 +187,9 @@ public class JsonThingConverterTest {
     public void fromMalformedJson() throws Exception{
         try {
             ThingObject things = jsonThingConverter.fromJson("{toto%*sd:cccq}");
-            fail("Should throw a JsonToModelReaderException when attempting to parse malformed Json");
+            fail("Should throw a MappingException when attempting to parse malformed Json");
         }
-        catch(JsonToModelReaderException e){
+        catch(MappingException e){
             assert(e.getMessage().contains("Reading json"));
         }
     }
