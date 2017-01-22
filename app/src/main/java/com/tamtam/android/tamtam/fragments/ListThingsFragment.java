@@ -17,6 +17,7 @@ import com.tamtam.android.tamtam.services.repository.FakeThingRepository;
 
 import java.util.List;
 
+// TODO DEBUG
 
 
 public class ListThingsFragment extends Fragment {
