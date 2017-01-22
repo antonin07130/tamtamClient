@@ -1,5 +1,7 @@
 package com.tamtam.android.tamtam.services.repository;
 
+import android.util.Log;
+
 import com.tamtam.android.tamtam.model.ThingObject;
 import com.tamtam.android.tamtam.services.json.Mapper;
 import com.tamtam.android.tamtam.services.json.MappingException;
@@ -13,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 public class FakeThingRepository implements Repository<ThingObject> {
+    private static final String TAG = "FakeThingRepository";
 
     // conversion services (to/from json string) like in the real implementation.
     final Mapper<String, ThingObject> jsonToModel;
@@ -23,7 +26,7 @@ public class FakeThingRepository implements Repository<ThingObject> {
 
     // static in memory collection to simulate a database (may be ugly)
     // it stores json Strings to look like real network request results
-    private final static ConcurrentHashMap<String, String> inMemoryJsonThings =
+    public final static ConcurrentHashMap<String, String> inMemoryJsonThings =
             new ConcurrentHashMap<>(SIMULTANEOUS_ACCESSES);
 
     //constant strings
@@ -114,8 +117,9 @@ public class FakeThingRepository implements Repository<ThingObject> {
     @Override
     public void add(ThingObject item) {
         try {
+            Log.d(TAG, "add: " + item);
             inMemoryJsonThings.put(item.getThingId(), jsonToModel.toJson(item));
-        } catch (jsonToModelWriterException e) {
+        } catch (MappingException e) {
             e.printStackTrace();
         }
     }

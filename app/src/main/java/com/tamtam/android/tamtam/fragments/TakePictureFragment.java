@@ -2,6 +2,7 @@ package com.tamtam.android.tamtam.fragments;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,6 +26,7 @@ import com.tamtam.android.tamtam.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -37,6 +39,52 @@ import static android.app.Activity.RESULT_CANCELED;
  */
 public class TakePictureFragment extends Fragment {
     private static final String TAG = "TakePictureFragment";
+
+
+    //*****************************
+    // CALLBACK WITH MAIN ACTIVITY
+    //*****************************
+
+    /**
+     * This callback object usually points to container action that implements the
+     * callback method (see {@link OnPictureTakenListener}).
+     */
+    OnPictureTakenListener mCallback;
+
+    /**
+     * This interface must be implemented by container activity.
+     * It is through this interface that container activity can get the Price Value
+     */
+    public interface OnPictureTakenListener {
+        /**
+         * Callback to provide to container activity the URI of the new photograph
+         * @param pictureURI URI of the picture (on the local filesystem)
+         */
+        public void onPictureTaken(URI pictureURI);
+    }
+
+    /**
+     * Called by android system to
+     * setup callback with the host activity. If the callback is not defined in the host activity,
+     * an exception is raised.
+     * @param activityContext host activity (filled by the system)
+     */
+    @Override
+    public void onAttach(Context activityContext) {
+        super.onAttach(activityContext);
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (OnPictureTakenListener) activityContext;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activityContext.toString()
+                    + " must implement OnPictureTakenListener");
+        }
+    }
+
+
+
+
 
     //*****************
     // PICTURE STORAGE
@@ -156,15 +204,23 @@ public class TakePictureFragment extends Fragment {
                     mPreviousPhotoPath = null;
                 }
 
+                // callback to main activity to send the picture result
+                // todo use URI created during file creation
+                mCallback.onPictureTaken(URI.create(mCurrentPhotoPath));
+
                 // Display the picture instead of the button
                 setImageButtonSrcToPic(mCurrentPhotoPath, mTakePictureIVBTN);
                 Log.d(TAG, "onActivityResult: picture taken");
                 Log.d(TAG, "onActivityResult: " + resultCode);
+
             } else {
                 Log.d(TAG, "onActivityResult: picture activity canceled");
                 Log.d(TAG, "onActivityResult: deleting empty file at" + mCurrentPhotoPath);
+                // Delete the currently being taken photo
                 new File(mCurrentPhotoPath).delete();
-                mCurrentPhotoPath = null;
+                // restore the saved PhotoPath
+                mCurrentPhotoPath = mPreviousPhotoPath;
+                mPreviousPhotoPath = null;
                 Toast.makeText(
                         getContext(),
                         getString(R.string.take_picture_fragment_photo_not_taken),
@@ -195,6 +251,8 @@ public class TakePictureFragment extends Fragment {
         );
 
         // if we already had taken a picture in the past
+        // we save the photopath to mPreviousPhotoPath to be able to restore it if the user cancels
+        // the action
         if (mValidPictureTaken){
             mPreviousPhotoPath = mCurrentPhotoPath;
         }
@@ -268,8 +326,5 @@ public class TakePictureFragment extends Fragment {
         outState.putBoolean(M_VALID_PICTURE_TAKEN_BK, mValidPictureTaken);
         outState.putString(M_PREVIOUS_PHOTO_PATH_BK, mPreviousPhotoPath);
     }
-
-
-
 
 }

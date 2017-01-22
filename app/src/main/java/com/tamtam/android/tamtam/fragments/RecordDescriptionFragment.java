@@ -82,8 +82,7 @@ public class RecordDescriptionFragment extends Fragment implements
             Log.d(TAG, "onEditorAction " + v.getText().toString());
             String description = v.getText().toString();
             mCallback.onDescriptionRecorded(description);
-
-            return true;
+            //return true;
         }
         return false;
     }
@@ -98,11 +97,12 @@ public class RecordDescriptionFragment extends Fragment implements
         mDescriptionEditText.onEditorAction(EditorInfo.IME_ACTION_SEND);
         
         // complex set of commands to hide the virtual keyboard.
+        /*
         InputMethodManager imm =
                 (InputMethodManager) this.getContext().
                         getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
+        */
     }
 
 

@@ -10,7 +10,7 @@
     android:id="@+id/activity_sell_thing"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="10000dp"
+    android:layout_height="15000dp"
     tools:context="com.tamtam.android.tamtam.activities.SellThingActivity">
     <FrameLayout
         android:id="@+id/activity_sell_thing_take_picture_frame"
@@ -44,7 +44,18 @@
         android:layout_weight="3"
         tools:src="@mipmap/ic_launcher"
         />
-    <android.support.v7.widget.AppCompatImageView
+    <Button
+        android:id="@+id/activity_sell_thing_sell_button"
+        android:layout_gravity="center"
+        android:text="@string/sell_thing_activity_sell_btn"
+        android:textAllCaps="true"
+        android:minHeight="@dimen/button_minimum_height"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_minimum_height" />
+    <ImageView
+        android:clickable="true"
+        android:id="@+id/activity_sell_thing_validate_sell"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="48dp"

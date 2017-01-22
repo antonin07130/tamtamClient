@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.tamtam.android.tamtam.R;
 import com.tamtam.android.tamtam.model.ThingObject;
-import com.tamtam.android.tamtam.model.ThingObject.PriceObject;
+import com.tamtam.android.tamtam.model.PriceObject;
 
 import java.util.Currency;
 
@@ -58,7 +58,7 @@ public class RecordPriceFragment extends Fragment implements
          * Callback to provide to container activity the price value
          * @param priceObject created by this fragment.
          */
-        public void onPriceRecorded(ThingObject.PriceObject priceObject);
+        public void onPriceRecorded(PriceObject priceObject);
     }
 
     /**
@@ -76,7 +76,7 @@ public class RecordPriceFragment extends Fragment implements
             mCallback = (OnPriceRecordedListener) activityContext;
         } catch (ClassCastException e) {
             throw new ClassCastException(activityContext.toString()
-                    + " must implement OnDescriptionRecordedListener");
+                    + " must implement OnPriceRecordedListener");
         }
     }
 
@@ -107,8 +107,8 @@ public class RecordPriceFragment extends Fragment implements
                     new PriceObject(
                             Currency.getInstance("EUR"),
                             Double.parseDouble(priceValueString)));
-            return true;
         }
+        // we dont consume the event to let other actions (hide keyboard, focus... chain up)
         return false;
     }
 

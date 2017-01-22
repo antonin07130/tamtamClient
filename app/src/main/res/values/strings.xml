@@ -5,21 +5,23 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
-
     <string name="sell_thing_take_picture">Take a picture</string>
+
+    <!-- activity_sell_thing -->
+    <string name="sell_thing_activity_sell_btn">sell that thing now !</string>
 
     <!-- fragment_take_picture -->
     <string name="take_picture_fragment_take_picture">Let\'s take a picture of the object</string>
     <string name="take_picture_fragment_photo_not_taken">Please try again to take a picture</string>
 
     <!-- fragment_record_price-->
-    <string name="record_price_fragment_ask_price">Tell your price</string>
+    <string name="record_price_fragment_ask_price">Your price, my price</string>
     <string name="record_price_fragment_price_text_hint">here</string>
     <string name="record_price_fragment_keyboard_ok">OK</string>
 
     <!-- fragment_record_description -->
-    <string name="record_description_fragment_ask_description">Tell more about this Thing</string>
-    <string name="record_description_fragment_description_text_hint">here</string>
+    <string name="record_description_fragment_ask_description">Want to tell a story about that Thing ?</string>
+    <string name="record_description_fragment_description_text_hint">here\ncomes your Thing\'s beautiful story...</string>
     <string name="record_description_fragment_button_text">OK</string>
 
     <!-- fragment_record_position -->
@@ -27,7 +29,7 @@
     <string name="record_position_fragment_longitude_text_hint">longitude</string>
     <string name="record_position_fragment_latitude_text_hint">latitude</string>
     <string name="record_position_fragment_authorization_explanation">
-        TamTam can help you define the position of the Things you sell atomatically.
+        TamTam can help you define the position of the Things you sell atomatically.\n You can help us help you by letting TamTam compute coarse locations.
     </string>
 
 </resources>

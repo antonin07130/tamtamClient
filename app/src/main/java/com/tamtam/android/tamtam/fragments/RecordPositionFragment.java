@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -22,37 +23,33 @@ import android.widget.EditText;
 
 import com.tamtam.android.tamtam.R;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
+import com.tamtam.android.tamtam.model.PositionObject;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RecordPositionFragment extends android.support.v4.app.Fragment {
+public class RecordPositionFragment extends android.support.v4.app.Fragment implements
+        LocationListener // to respond to position events
+{
     private static final String TAG = "RecordPositionFragment";
 
     // request code used for location permission checks callbacks
     private static final int COARSELOCATION_PERMISSION_REQUEST_CODE = 1;
-    private static final int FINELOCATION_PERMISSION_REQUEST_CODE = 2;
+    //private static final int FINELOCATION_PERMISSION_REQUEST_CODE = 2; // not used
 
-    // type of location provider
+    // location provider parameters
     private static final String LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
-
+    private static final int MIN_LOC_UPDATE = 0;
+    private static final int  MIN_LOC_DISTANCE = 0;
+    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;
 
     // reference to EditTexts contained in this fragment
     // (validity on reloads not tested)
     EditText mLongitudeEditText;
     EditText mLatitudeEditText;
 
-    boolean mLongitudeRecorded = false;
-    boolean mLatitudeRecorded = false;
-
-    boolean mPositionTrackingOnGoing = false;
-
-
-    double mLongitudeValue;
-    double mLatitudeValue;
-
-
+    PositionObject mCurrentPosition = null;
+    LocationManager mLocationManager;
     /**
      * Empty constructor
      */
@@ -77,9 +74,9 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment {
     public interface OnPositionRecordedListener {
         /**
          * Callback to provide to container with the position
-         * @param location created by this fragment.
+         * @param position created by this fragment.
          */
-        public void onPositionRecorded(Location location);
+        public void onPositionRecorded(PositionObject position);
     }
 
     /**
@@ -97,11 +94,27 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment {
             mCallback = (OnPositionRecordedListener) activityContext;
         } catch (ClassCastException e) {
             throw new ClassCastException(activityContext.toString()
-                    + " must implement OnDescriptionRecordedListener");
+                    + " must implement OnPositionRecordedListener");
         }
     }
 
 
+    //*********************
+    // LIFECYCLE CALLBACKS
+    //*********************
+
+    /**
+     * start the location service on fragment creation.
+     */
+    @Override
+    public void onStart() {
+        super.onStart();
+        // store the location manager
+        mLocationManager = (LocationManager)
+                this.getActivity().getSystemService(Context.LOCATION_SERVICE);
+        Log.d(TAG, "onStart: try to setup location updates");
+        setupLocalizationCallbackWithPermission();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -110,18 +123,21 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment {
         View fragmentView = inflater.inflate(R.layout.fragment_record_position, container, false);
 
         mLongitudeEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_postion_longitude_et);
-        //setUpTextEditCallback(mLongitudeEditText, mCallback);
-
         mLatitudeEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_postion_latitude_et);
-        //setUpTextEditCallback(mLatitudeEditText, mCallback);
 
-
-        if (savedInstanceState == null) { // if this is the first time setup :
-            // can we use localization service
-            setupLocalizationCallbackWithPermission();
-            // not much to save and restore here
-        }
         return fragmentView;
+    }
+
+    /**
+     * Don't forget to stop position updates when stopping the activity
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (hasPermission(LOCATION_PERMISSION)) {
+            mLocationManager.removeUpdates(this);
+            Log.d(TAG, "onStop: remove location updates");
+        }
     }
 
 
@@ -129,84 +145,74 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment {
     // LOCATION CODE
     //***************
 
-
-    @RequiresPermission(ACCESS_COARSE_LOCATION)
-    void setupLocalizationCallback() {
-        Log.d(TAG, "setupLocalizationCallback: started");
-        // Acquire a reference to the host activity's system Location Manager
-        final LocationManager locationManager = (LocationManager)
-                this.getActivity().getSystemService(Context.LOCATION_SERVICE);
-
-        // Define a listener that responds to location updates
-        LocationListener locationListener = new LocationListener() {
-            public void onLocationChanged(Location location) {
-                // Called when a new location is found by the network location provider.
-                onLocationFound(location);
-                Log.d(TAG, "onLocationChanged: found a location");
-                locationManager.removeUpdates(this);
-                mPositionTrackingOnGoing = false;
-                Log.d(TAG, "onLocationChanged: locationManager.removeUpdates");
-            }
-
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            public void onProviderEnabled(String provider) {
-            }
-
-            public void onProviderDisabled(String provider) {
-            }
-        };
-
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-        mPositionTrackingOnGoing = true;
-        Log.d(TAG, "setupLocalizationCallback: done");
+    public void onLocationChanged(Location location) {
+        // Called when a new location is found by the network location provider.
+        onLocationFound(location);
+        Log.d(TAG, "onLocationChanged: found a location");
+        mLocationManager.removeUpdates(this);
+        Log.d(TAG, "onLocationChanged: remove location updates");
     }
 
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    public void onProviderEnabled(String provider) {
+    }
+
+    public void onProviderDisabled(String provider) {
+    }
+
+    @RequiresPermission(LOCATION_PERMISSION)
+    void setupLocalizationCallback() {
+        // Acquire a reference to the host activity's system Location Manager
+        mLocationManager.requestLocationUpdates(LOCATION_PROVIDER, MIN_LOC_UPDATE, MIN_LOC_DISTANCE, this);
+        Log.d(TAG, "setupLocalizationCallback: location updates started");
+    }
+
+
+    /**
+     * Callback to communicate position to the host activity
+     * @param location last measured location
+     */
     void onLocationFound(Location location){
         Log.d(TAG, "onLocationFound: " + location);
         mLatitudeEditText.setText(String.valueOf(location.getLatitude()));
         mLongitudeEditText.setText(String.valueOf(location.getLongitude()));
-        mCallback.onPositionRecorded(location);
+        mCurrentPosition = new PositionObject(
+                location.getLongitude(), location.getLatitude());
+        mCallback.onPositionRecorded(mCurrentPosition);
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mPositionTrackingOnGoing){
-            // todo correct unsafe method : user may have disallowed position while the applciaitoon was tracking
 
-            // todo stop location manager !!!
-        }
-    }
 
-//***********************
+
+    //***********************
     // PERMISSION CHECK CODE
     //***********************
 
     void setupLocalizationCallbackWithPermission() {
         Log.d(TAG, "setupLocalizationCallbackWithPermission");
-        if (checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+        if (hasPermission(LOCATION_PERMISSION)) {
             setupLocalizationCallback();
         } else {
-            requestPermissionAsync(Manifest.permission.ACCESS_COARSE_LOCATION,
+            requestPermissionAsync(LOCATION_PERMISSION,
                     COARSELOCATION_PERMISSION_REQUEST_CODE);
         }
     }
 
     /**
      * Check if we have the permissionToCheck.
-     * @param permissionToCheck
+     * @param permissionToCheck the permission reference to check according to {@link Manifest}.permission
      * @return {@code true} if we have the permissionToCheck, {@code false} otherwise
      */
-    boolean checkPermission(String permissionToCheck) {
+    boolean hasPermission(String permissionToCheck) {
         if (ContextCompat.checkSelfPermission(this.getContext(),
                 permissionToCheck)
                 == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "checkPermission: " + permissionToCheck + " GRANTED");
+            Log.d(TAG, "hasPermission: " + permissionToCheck + " GRANTED");
             return true;
         } else {
-            Log.d(TAG, "checkPermission: permission " + permissionToCheck + " NOT granted");
+            Log.d(TAG, "hasPermission: permission " + permissionToCheck + " NOT granted");
             return false;
         }
     }
@@ -221,7 +227,7 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment {
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(this.getActivity(),
                     permissionToRequest)) {
-                Log.d(TAG, "checkPermission: explaining why localization is needed");
+                Log.d(TAG, "hasPermission: explaining why localization is needed");
                 showMessageOKCancel(getContext().getString(
                         R.string.record_position_fragment_authorization_explanation),
                         new DialogInterface.OnClickListener() {
@@ -236,7 +242,7 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment {
             } else {
                 requestPermissions( new String[]{permissionToRequest},
                                     permissionRequestCode);
-                Log.d(TAG, "checkPermission: requesting permission with request code : "
+                Log.d(TAG, "hasPermission: requesting permission with request code : "
                         + permissionRequestCode);
             }
 

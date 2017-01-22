@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class FakeThingRepositoryTest {
 
     FakeThingRepository fakeThingRepo;
-    JsonThingConverter thingConverter = new JsonThingConverter();
+    JsonThingConverter thingConverter = new JsonThingConverter(); // todo should be mocked ?
 
     ThingObject thing1 = thingConverter.fromJson(JsonThingTestData.JSON_THING_STRING_1);
     ThingObject thing2 = thingConverter.fromJson(JsonThingTestData.JSON_THING_STRING_2);
@@ -30,13 +30,13 @@ public class FakeThingRepositoryTest {
 
     @Test
     public synchronized void constructor() throws Exception {
-        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter, thingConverter);
+        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter);
 
     }
 
     @Test
     public synchronized void query() throws Exception {
-        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter, thingConverter);
+        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter);
         fakeThingRepo.add(thing1);
         fakeThingRepo.add(thing2);
         fakeThingRepo.add(thing3);
@@ -49,7 +49,7 @@ public class FakeThingRepositoryTest {
 
     @Test
     public synchronized void addSeveral() throws Exception {
-        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter, thingConverter);
+        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter);
         HashSet<ThingObject> thingObjects = new HashSet<>(Arrays.asList(thing1,thing2,thing3));
         fakeThingRepo.add(thingObjects);
 
@@ -58,7 +58,7 @@ public class FakeThingRepositoryTest {
 
     @Test
     public synchronized void addOne() throws Exception {
-        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter, thingConverter);
+        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter);
         fakeThingRepo.add(thing1);
 
         assertEquals(thing1, fakeThingRepo.queryOne(thing1));
@@ -66,7 +66,7 @@ public class FakeThingRepositoryTest {
 
     @Test
     public synchronized void update() throws Exception {
-        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter, thingConverter);
+        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter);
         fakeThingRepo.add(thing1);
         fakeThingRepo.add(thing2);
 
@@ -88,7 +88,7 @@ public class FakeThingRepositoryTest {
 
     @Test
     public synchronized void removeSeveral() throws Exception {
-        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter, thingConverter);
+        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter);
         fakeThingRepo.add(thing1);
         fakeThingRepo.add(thing2);
         fakeThingRepo.add(thing3);
@@ -97,7 +97,7 @@ public class FakeThingRepositoryTest {
 
     @Test
     public synchronized void remove1() throws Exception {
-        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter, thingConverter);
+        FakeThingRepository fakeThingRepo = new FakeThingRepository(thingConverter);
         fakeThingRepo.add(thing1);
         fakeThingRepo.add(thing2);
         fakeThingRepo.add(thing3);

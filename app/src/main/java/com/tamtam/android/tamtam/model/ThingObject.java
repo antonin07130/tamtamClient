@@ -30,116 +30,6 @@ import static android.R.attr.name;
 
 
     /**
-     * This class represents a price and its currency.
-     * todo : use android currency ? java.util.Currency;
-     **/
-     public static class PriceObject implements java.io.Serializable {
-        private final Currency currency;
-        private final double price;
-
-        /**
-         * create a new price object
-         * @param currency : iso4217 code for this currency
-         * @param price : price in the defined currency
-         */
-         public PriceObject(Currency currency, double price) {
-             if (currency !=null) {
-                 this.currency = currency;
-                 this.price = price;
-             } else {
-                 throw new IllegalArgumentException("currency must be an iso4217 currency");
-             }
-        }
-         public Currency getCurrency(){ return currency; }
-         public double getValue(){ return price; }
-
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            PriceObject that = (PriceObject) o;
-
-            if (Double.compare(that.price, price) != 0) return false;
-            return currency.equals(that.currency);
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result;
-            long temp;
-            result = currency.hashCode();
-            temp = Double.doubleToLongBits(price);
-            result = 31 * result + (int) (temp ^ (temp >>> 32));
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return "PriceObject{" +
-                    "currency=" + currency +
-                    ", price=" + price +
-                    '}';
-        }
-    }
-
-    /**
-     * This class represents a position (longitude, latitude)
-     */
-     public static class PositionObject implements java.io.Serializable{
-        private final double longitude;
-        private final double latitude;
-        /**
-         * to prepare GeoJson std, the order of positions should be lon, lat, [altitude]
-         * @param longitude longitude value
-         * @param latitude latitude value
-         */
-        public PositionObject(double longitude, double latitude) {
-            this.longitude = longitude;
-            this.latitude = latitude;
-        }
-        public double getLongitude() { return longitude; }
-        public double getLatitude(){
-                return latitude;
-        }
-
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            PositionObject that = (PositionObject) o;
-
-            if (Double.compare(that.longitude, longitude) != 0) return false;
-            return Double.compare(that.latitude, latitude) == 0;
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result;
-            long temp;
-            temp = Double.doubleToLongBits(longitude);
-            result = (int) (temp ^ (temp >>> 32));
-            temp = Double.doubleToLongBits(latitude);
-            result = 31 * result + (int) (temp ^ (temp >>> 32));
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return "PositionObject{" +
-                    "longitude=" + longitude +
-                    ", latitude=" + latitude +
-                    '}';
-        }
-    }
-
-
-    /**
      * Use this class to build a new thing from scratch :
      * {@code new ThingObject.ThingBuilder("ID_KEYNAME")
     .pict("base64encodedPicture")
@@ -150,6 +40,7 @@ import static android.R.attr.name;
     .build(); }
      */
     public static class ThingBuilder {
+
 
         private String thingId = "";
         private String pict;
@@ -234,6 +125,19 @@ import static android.R.attr.name;
                  throw new IllegalArgumentException("thingId or price or position is null or empty");
              }
          }
+
+        @Override
+        public String toString() {
+            return "ThingBuilder{" +
+                    "thingId='" + thingId + '\'' +
+                    ", pict='" + pict + '\'' +
+                    ", description='" + description + '\'' +
+                    ", price=" + price +
+                    ", position=" + position +
+                    ", stuck=" + stuck +
+                    '}';
+        }
+
     }
 
     /**

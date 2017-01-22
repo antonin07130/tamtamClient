@@ -5,8 +5,8 @@ import android.util.JsonToken;
 import android.util.JsonWriter;
 
 import com.tamtam.android.tamtam.model.ThingObject;
-import com.tamtam.android.tamtam.model.ThingObject.PositionObject;
-import com.tamtam.android.tamtam.model.ThingObject.PriceObject;
+import com.tamtam.android.tamtam.model.PositionObject;
+import com.tamtam.android.tamtam.model.PriceObject;
 
 import java.io.IOException;
 import java.util.Currency;
