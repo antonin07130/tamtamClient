@@ -19,7 +19,15 @@ import java.util.List;
 
 // TODO DEBUG
 
-
+/**
+ * have a look at :
+ * http://square.github.io/picasso/
+ * may help doing things the easy way ?
+ * look at licensing as well
+ *
+ * this as well :
+ * http://stackoverflow.com/questions/26890190/images-in-recyclerview
+ */
 public class ListThingsFragment extends Fragment {
     private static String TAG = "ListThingsFragment";
     
@@ -28,9 +36,11 @@ public class ListThingsFragment extends Fragment {
     String mRepoURI;
     FakeThingRepository mThingRepo; // todo replace by Repository<ThingObject>
 
-    RecyclerView mRecyclerView;
-    LinearLayoutManager mLayoutManager;
-    List<ThingObject> mThingList;
+    RecyclerView mRecyclerView = null;
+    LinearLayoutManager mLayoutManager = null;
+    ThingObjectAdapter mItemsAdapter = null;
+    List<ThingObject> mThingList = null; // to remove ?
+    private boolean mDataRefreshed = false; // have we already refreshed data for this lifecycle ?
 
     // Factory constructor to save arguments to the Bundle
     public static ListThingsFragment newInstance(String repoURI) {
@@ -79,23 +89,13 @@ public class ListThingsFragment extends Fragment {
         Log.d(TAG, "onStart");
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // refresh data here to handle coming back from other actovity (ugly)
-        // todo do better
-        Log.d(TAG, "onResume : refreshing data from repo"); //suboptimal...
-        mThingList = mThingRepo.queryAll();
-        Log.d(TAG, "onResume : notify dataset has changed");
-        mRecyclerView.getAdapter().notifyDataSetChanged();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         Log.d(TAG, "onCreateView: refreshing data from repo");
-        mThingList = mThingRepo.queryAll();
+        //mThingList = mThingRepo.queryAll();
 
         Log.d(TAG, "onCreateView: creating fragment view");
 
@@ -108,18 +108,50 @@ public class ListThingsFragment extends Fragment {
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
+        //mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        ThingObjectAdapter itemsAdapter =
-                new ThingObjectAdapter(mThingList);
+        Log.d(TAG, "onCreateView: refresh data");
+        mItemsAdapter = new ThingObjectAdapter(mThingRepo.queryAll());
+        // data is all fresh from creation
+        mDataRefreshed = true;
+        Log.d(TAG, "onCreateView: set mDataRefreshed flag to true");
+
         //(this, R.layout.thing_vignette, objectsAround);
-        mRecyclerView.setAdapter(itemsAdapter);
+        mRecyclerView.setAdapter(mItemsAdapter);
 
        return mRecyclerView;
     }
 
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // was data refreshed by onCreateView ?
+        if (!mDataRefreshed){
+            // refresh data here to handle coming back from other actovity (ugly)
+            // todo do better
+            Log.d(TAG, "onResume : refresh data from repo"); //suboptimal...
+            // todo remove ref to mThingList
+            //mThingList.clear();
+            //mThingList.addAll(mThingRepo.queryAll());
+            mItemsAdapter.swap(mThingRepo.queryAll());
+            Log.d(TAG, "onResume: set mDataRefreshed to true");
+            mDataRefreshed = true;
+        }
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // when we start exiting/hiding this view, consider that the data is not fresh
+        mDataRefreshed = false;
+        Log.d(TAG, "onPause: set mDataRefreshed to false");
+    }
 }

@@ -19,12 +19,21 @@ import java.util.List;
 import java.util.Locale;
 
 import java.util.Currency;
+
+import static android.R.attr.data;
+
 /**
  * Created by antoninpa on 24/12/16.
  * followed these guidelines :
  * https://developer.android.com/training/material/lists-cards.html
  */
 
+/**
+ * This adapter works for showing small lists of {@link ThingObject}
+ * (it relies in an on memory list of Things).
+ * The list can be replaced by another by using the swap command.
+ * The same interal list is reused preventing a garbage collection.
+ */
 public class ThingObjectAdapter extends RecyclerView.Adapter<ThingObjectAdapter.ViewHolder> {
 
      private List<ThingObject> mDataset;
@@ -32,6 +41,12 @@ public class ThingObjectAdapter extends RecyclerView.Adapter<ThingObjectAdapter.
 
         public ThingObjectAdapter(List<ThingObject> objects) {
             mDataset = objects;
+        }
+
+        public void swap(List<ThingObject> objects){
+            mDataset.clear();
+            mDataset.addAll(objects);
+            notifyDataSetChanged();
         }
 
         // Create new views (invoked by the layout manager)

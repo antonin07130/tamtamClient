@@ -9,7 +9,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -21,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.tamtam.android.tamtam.BuildConfig;
 import com.tamtam.android.tamtam.R;
 
 
@@ -33,15 +33,25 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment impl
 {
     private static final String TAG = "RecordPositionFragment";
 
-    // request code used for location permission checks callbacks
-    private static final int COARSELOCATION_PERMISSION_REQUEST_CODE = 1;
-    //private static final int FINELOCATION_PERMISSION_REQUEST_CODE = 2; // not used
+    //*********************
+    // LOCATION PARAMETERS
+    //*********************
 
     // location provider parameters
-    private static final String LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
+    //private static final String LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER; // coarse
+    private static final String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER; // fine
+    // DO NOT FORGET THE MANIFEST FILE !
+
+    // request code used for location permission checks callbacks
+    //private static final int LOCATION_PERMISSION_REQUEST_CODE = 1; // coarse
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 2; // fine
+
     private static final int MIN_LOC_UPDATE = 0;
     private static final int  MIN_LOC_DISTANCE = 0;
-    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    //private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;// coarse
+    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;// fine
+
+
 
     // reference to EditTexts contained in this fragment
     // (validity on reloads not tested)
@@ -125,6 +135,15 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment impl
         mLongitudeEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_postion_longitude_et);
         mLatitudeEditText = (EditText) fragmentView.findViewById(R.id.fragment_record_postion_latitude_et);
 
+        // simulate a location update if we are in debug
+        if (BuildConfig.DEBUG) {
+            Location fakeLocation = new Location("fakeProvider");
+            fakeLocation.setLongitude(7.05334);
+            fakeLocation.setLatitude(43.61664);
+            onLocationFound(fakeLocation);
+        }
+
+
         return fragmentView;
     }
 
@@ -165,7 +184,10 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment impl
     @RequiresPermission(LOCATION_PERMISSION)
     void setupLocalizationCallback() {
         // Acquire a reference to the host activity's system Location Manager
-        mLocationManager.requestLocationUpdates(LOCATION_PROVIDER, MIN_LOC_UPDATE, MIN_LOC_DISTANCE, this);
+        mLocationManager.requestLocationUpdates( LOCATION_PROVIDER, // GPS or network ?
+                                                 MIN_LOC_UPDATE,    // update rate
+                                                 MIN_LOC_DISTANCE,  // accuracy
+                                                 this );            // requester (implements callback)
         Log.d(TAG, "setupLocalizationCallback: location updates started");
     }
 
@@ -193,10 +215,12 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment impl
     void setupLocalizationCallbackWithPermission() {
         Log.d(TAG, "setupLocalizationCallbackWithPermission");
         if (hasPermission(LOCATION_PERMISSION)) {
+            Log.d(TAG, "setupLocalizationCallbackWithPermission : permission OK, setting up localization");
             setupLocalizationCallback();
         } else {
+            Log.d(TAG, "setupLocalizationCallbackWithPermission : permission NOK requesting");
             requestPermissionAsync(LOCATION_PERMISSION,
-                    COARSELOCATION_PERMISSION_REQUEST_CODE);
+                    LOCATION_PERMISSION_REQUEST_CODE);
         }
     }
 
@@ -262,8 +286,9 @@ public class RecordPositionFragment extends android.support.v4.app.Fragment impl
                                            String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        Log.d(TAG, "onRequestPermissionsResult: grantResult = " + grantResults);
         switch (requestCode) {
-            case COARSELOCATION_PERMISSION_REQUEST_CODE: {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
