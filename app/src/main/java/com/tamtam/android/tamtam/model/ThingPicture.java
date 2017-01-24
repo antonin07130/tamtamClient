@@ -5,6 +5,7 @@ package com.tamtam.android.tamtam.model;
  */
 
 import java.io.File;
+import java.net.URI;
 
 /**
  * Class representing a picture in our application
@@ -14,7 +15,7 @@ import java.io.File;
  */
 public class ThingPicture {
     final File picureFile;
-    ThingPicture(File pictureFile) {
+    public ThingPicture(File pictureFile) {
         if (pictureFile != null
                 && pictureFile.isFile()
                 && pictureFile.canRead()

@@ -13,15 +13,21 @@ import java.util.List;
  * We have to choose android persistnece system for this repository. It has to live through reboots
  * of the app.
  */
-public class PictureFileRepository implements Repository<File> {
+public class ImageFileRepository implements Repository<File> {
     @Override
     public List<File> query(Specification querySpecification) {
+
+        // could return file based on imagefilename ?
+        // could return file based on path
+        // could return file associated with a specific thing
         return null;
     }
 
     @Override
     public void add(File item) {
         // store file information to local database
+
+        // write file in the disk
 
     }
 

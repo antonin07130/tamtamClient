@@ -2,8 +2,8 @@ package com.tamtam.android.tamtam.services.json;
 
 import com.tamtam.android.tamtam.JsonThingTestData;
 import com.tamtam.android.tamtam.model.ThingObject;
-import com.tamtam.android.tamtam.model.ThingObject.PositionObject;
-import com.tamtam.android.tamtam.model.ThingObject.PriceObject;
+import com.tamtam.android.tamtam.model.PositionObject;
+import com.tamtam.android.tamtam.model.PriceObject;
 import com.tamtam.android.tamtam.model.UserObject;
 import com.tamtam.android.tamtam.services.json.JsonThingConverter;
 

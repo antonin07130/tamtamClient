@@ -131,7 +131,6 @@ public class ListThingsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
         // was data refreshed by onCreateView ?
         if (!mDataRefreshed){
             // refresh data here to handle coming back from other actovity (ugly)
