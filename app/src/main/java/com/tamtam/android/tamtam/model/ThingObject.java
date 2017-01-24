@@ -22,7 +22,7 @@ import static android.R.attr.name;
     public static String LOG_TAG = "ThingObject";
 
     private final String thingId; // never empty
-    private final String pict;
+    private final ThingPicture pict;
     private final String description;
     private final PriceObject price; // never null
     private final PositionObject position; // never null
@@ -32,7 +32,7 @@ import static android.R.attr.name;
     /**
      * Use this class to build a new thing from scratch :
      * {@code new ThingObject.ThingBuilder("ID_KEYNAME")
-    .pict("base64encodedPicture")
+    .pict(Byte[] of the jpeg file)
     .description("description")
     .position(positionObject)
     .price(priceObject)
@@ -43,7 +43,7 @@ import static android.R.attr.name;
 
 
         private String thingId = "";
-        private String pict;
+        private ThingPicture pict;
         private String description;
         private PriceObject price;
         private PositionObject position;
@@ -67,7 +67,7 @@ import static android.R.attr.name;
         /**
          * @param pict the picture encoded in base64 stored in a String
          */
-         public ThingBuilder pict(String pict) {
+         public ThingBuilder pict(ThingPicture pict) {
             this.pict = pict;
             return this;
         }
@@ -158,7 +158,7 @@ import static android.R.attr.name;
      public PositionObject getPosition(){return this.position;}
      public PriceObject getPrice(){return  this.price;}
      public String getThingId(){return this.thingId;}
-     public String getPict(){return this.pict;}
+     public ThingPicture getPict(){return this.pict;}
      public String getDescription(){return this.description;}
      public boolean getStuck(){return this.stuck;}
 

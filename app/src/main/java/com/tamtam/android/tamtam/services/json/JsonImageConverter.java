@@ -12,6 +12,7 @@ import android.util.Base64;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 import android.util.Log;
+import android.util.LruCache;
 
 import com.tamtam.android.tamtam.model.ThingPicture;
 
@@ -20,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import static android.R.attr.mode;
 import static android.R.attr.path;
 import static android.content.ContentValues.TAG;
 import static android.os.Build.VERSION_CODES.M;
@@ -29,59 +31,41 @@ import static android.os.Build.VERSION_CODES.M;
  * it takes an ancoded image as an input,
  * records the input to local storage and returns a reference to this image.
  */
-public class JsonImageConverter extends JsonObjectConverter<ThingPicture> {
+public class JsonImageConverter extends JsonObjectConverter<byte[]> {
     private static final String TAG = "JsonImageConverter";
+
+    private LruCache<File, Bitmap> mBitmapCache;
 
     static final int[] encodings = {Base64.DEFAULT, Base64.URL_SAFE, Base64.CRLF,
             Base64.NO_PADDING, Base64.NO_CLOSE, Base64.NO_WRAP };
 
 
+
     @Override
-    protected ThingPicture readObject(JsonReader reader) throws IOException {
+    protected byte[] readObject(JsonReader reader) throws IOException {
         byte[] decodedString = null;
-        Bitmap decodedByte = null;
-        for (int encoding : encodings) {
-            try {
-                decodedString = Base64.decode(reader.nextString(), encoding);
-            } catch (IllegalArgumentException e) {
-                if (! e.getMessage().contains("bad base-64")) {
-                    throw e;
-                }
-                Log.d(TAG, "readObject: trying other base 64 decode : " + encoding);
-            } finally { // todo make sure finally close is needed here
-                reader.close();
-            }
-        }
-
-        //Do we need to transfor it to bitmap ?
-        /**
-        if (decodedString != null){
-                decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        }
-         **/
-
-        String filename = "myfile";
-        File fileToWrite = new File("PQTHOFTHISFILE");
-        FileOutputStream outputStream = new FileOutputStream(fileToWrite);
-
+        //Bitmap decodedByte = null;
         try {
-            //outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(decodedString);
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // todo maybe add the "image to repo" that deals with caching, bitmap convesion for display...
-
-        // read a Json
-        // write it to disk
-        // return the file url in a file object in a ThingPicture
-        return new ThingPicture(fileToWrite);
+            Log.d(TAG, "readObject: reading base64 byte[] from json");
+            decodedString = Base64.decode(reader.nextString(), Base64.NO_WRAP | Base64.URL_SAFE);
+        } catch (IllegalArgumentException e) {
+            Log.d(TAG, "readObject: trying to read base64 String error make sure it was created with NO_WRAP and URL_SAFE arguments");
+            throw new IOException("image base64 decoding error was it created with NO_WRAP and URL_SAFE flags ?", e);
+        } 
+        return decodedString;
     }
 
+    
     @Override
-    protected void writeObject(JsonWriter writer, ThingPicture modelObject) throws IOException {
+    protected void writeObject(JsonWriter writer, byte[] modelObject) throws IOException {
 
+        if (modelObject != null && modelObject.length >0) {
+            Log.d(TAG, "writeObject: writing byte[] to base64 String");
+            writer.value(Base64.encodeToString(modelObject, Base64.NO_WRAP | Base64.URL_SAFE));
+        }
+        else {
+            Log.d(TAG, "writeObject: writing null value to json");
+            writer.nullValue();
+        }
     }
 }

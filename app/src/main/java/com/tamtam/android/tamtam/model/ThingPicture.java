@@ -14,17 +14,19 @@ import java.net.URI;
  *
  */
 public class ThingPicture {
-    final File picureFile;
-    public ThingPicture(File pictureFile) {
-        if (pictureFile != null
-                && pictureFile.isFile()
-                && pictureFile.canRead()
-                && pictureFile.length() > 0) {
-            this.picureFile = pictureFile;
-        } else {
-            throw new IllegalArgumentException("Tried to build an invalid ThingPicture");
-        }
+    final Byte[] picureFile;
+    public ThingPicture(Byte[] pictureFile) {
+        //if (pictureFile != null
+        //        && pictureFile.isFile()
+        //        && pictureFile.canRead()
+        //        && pictureFile.length() > 0) {
+        this.picureFile = pictureFile;
+        //} else {
+        //    throw new IllegalArgumentException("Tried to build an invalid ThingPicture");
+        //}
     }
 
-    File getPicureFile(){return picureFile;}
+    Byte[] getPicureFile(){
+        return picureFile;
+    }
 }

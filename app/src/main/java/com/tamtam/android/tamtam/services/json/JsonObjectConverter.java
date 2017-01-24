@@ -162,7 +162,7 @@ abstract class JsonObjectConverter<M> implements Mapper<String, M> {
         try {
             c.close();
         } catch (IOException e) {
-            Log.e(TAG, "toJson: error trying to close" + c.getClass(), e);
+            Log.e(TAG, "close: error trying to close" + c.getClass(), e);
             e.printStackTrace();
         }
     }
