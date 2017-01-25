@@ -111,6 +111,7 @@ public class TakePictureFragment extends Fragment {
     // request code for picture taking activity
     // (only useful if several intents are dispatched fom this)
     static final int REQUEST_CODE_IMAGE_CAPTURE = 1;
+    // todo use Bitmap.recycle() in onstop etc to free bitmap memory
 
     //**************
     // GUI ELEMENTS

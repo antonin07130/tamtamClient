@@ -1,5 +1,6 @@
 package com.tamtam.android.tamtam.activities;
 
+import android.graphics.Bitmap;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,13 +17,19 @@ import com.tamtam.android.tamtam.fragments.TakePictureFragment;
 import com.tamtam.android.tamtam.model.ThingObject;
 import com.tamtam.android.tamtam.model.PriceObject;
 import com.tamtam.android.tamtam.model.PositionObject;
+import com.tamtam.android.tamtam.model.ThingPicture;
+import com.tamtam.android.tamtam.services.image.BitmapUtils;
 import com.tamtam.android.tamtam.services.json.JsonThingConverter;
 import com.tamtam.android.tamtam.services.repository.FakeThingRepository;
 import com.tamtam.android.tamtam.services.repository.Repository;
 
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static com.tamtam.android.tamtam.services.image.BitmapUtils.calculateInSampleSize;
+import static com.tamtam.android.tamtam.services.image.BitmapUtils.decodeSampledBitmapFromPath;
 
 
 public class SellThingActivity extends AppCompatActivity
@@ -195,6 +202,36 @@ public class SellThingActivity extends AppCompatActivity
             return;
         }
 
+
+        //******************
+        // IMAGE PROCESSING
+        //******************
+
+        // todo move that to another class
+
+        // build snapshot from image file
+        int[] fullImageBounds = BitmapUtils.readBounds(mPictURI.getPath());
+        int inSampleSize = BitmapUtils.calculateInSampleSize(fullImageBounds[0], fullImageBounds[1],
+                ThingPicture.THUMBNAIL_WIDTH, ThingPicture.THUMBNAIL_HEIGHT);
+
+        // create ThingPicture
+        Bitmap resizedBM = decodeSampledBitmapFromPath(mPictURI.getPath(),
+                ThingPicture.THUMBNAIL_WIDTH, ThingPicture.THUMBNAIL_HEIGHT);
+
+        // create image id
+
+        String pictureId = "fakePictureID";
+        // save ThingPicture
+
+        ThingPicture fakePicture = new ThingPicture(pictureId, resizedBM);
+        
+        // todo in the future : put full size image in imagerepo (to store somewhere)
+
+
+
+
+
+
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         // start building a thingobject with available info
         ThingObject.ThingBuilder thingBuilder = new ThingObject.ThingBuilder()
@@ -202,7 +239,7 @@ public class SellThingActivity extends AppCompatActivity
                 .description(mDescription)
                 .position(mPosition)
                 .price(mPrice)
-                .pict(mPictURI.toString()); // todo remove tostring when model will have changed
+                .pict(fakePicture); // todo finish working on picture model
 
         Log.d(TAG, "onClick: thingbuilder = " + thingBuilder);
 
