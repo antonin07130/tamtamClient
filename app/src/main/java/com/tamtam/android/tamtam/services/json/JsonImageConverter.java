@@ -35,13 +35,6 @@ public class JsonImageConverter extends JsonObjectConverter<ThingPicture> {
     private static final String PICTUREENCODED_KEYNAME = "picture_bitmap";
 
 
-
-
-    private LruCache<File, Bitmap> mBitmapCache;
-
-    static final int[] encodings = {Base64.DEFAULT, Base64.URL_SAFE, Base64.CRLF,
-            Base64.NO_PADDING, Base64.NO_CLOSE, Base64.NO_WRAP };
-
     @Override
     protected ThingPicture readObject(JsonReader reader) throws IOException {
         Bitmap parsedBitmap = null;

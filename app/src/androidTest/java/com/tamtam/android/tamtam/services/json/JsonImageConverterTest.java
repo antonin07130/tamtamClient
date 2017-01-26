@@ -9,22 +9,22 @@ import static org.junit.Assert.*;
  */
 public class JsonImageConverterTest {
     @Test
-    public void readObject() throws Exception {
+    public void fromJson() throws Exception {
 
     }
 
     @Test
-    public void readBitmap() throws Exception {
+    public void fromJsonArray() throws Exception {
 
     }
 
     @Test
-    public void writeObject() throws Exception {
+    public void toJson() throws Exception {
 
     }
 
     @Test
-    public void encodeToBase64() throws Exception {
+    public void toJsonArray() throws Exception {
 
     }
 
