@@ -7,9 +7,12 @@ import android.util.JsonWriter;
 import com.tamtam.android.tamtam.model.ThingObject;
 import com.tamtam.android.tamtam.model.PositionObject;
 import com.tamtam.android.tamtam.model.PriceObject;
+import com.tamtam.android.tamtam.model.ThingPicture;
 
 import java.io.IOException;
 import java.util.Currency;
+
+import static android.os.Build.VERSION_CODES.M;
 
 /**
  * Created by fcng1847 on 11/01/17.
@@ -32,6 +35,9 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
 
 
     protected void writeObject(JsonWriter writer, ThingObject thing) throws IOException {
+
+        Mapper<String, ThingPicture> thingPictureMapper = new JsonImageConverter();
+
         writer.beginObject();
         writer.name(ID_KEYNAME).value(thing.getThingId());
         writer.name(DESCRIPTION_KEYNAME).value(thing.getDescription());
@@ -39,7 +45,11 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
         writePosition(writer, thing.getPosition());
         writer.name(PRICE_OBJ_KEYNAME);
         writePrice(writer, thing.getPrice());
-        writer.name(PICTURE_KEYNAME).value(thing.getPict());
+        try { // have to convert MappingException back to IOException
+            writer.name(PICTURE_KEYNAME).value(thingPictureMapper.toJson(thing.getPict()));
+        } catch (Exception e) {
+            throw new IOException("writing picture to json failed", e);
+        }
         writer.name(STUCK_KEYNAME).value(thing.getStuck());
         writer.endObject();
     }
@@ -62,6 +72,7 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
 
 
     protected ThingObject readObject(JsonReader reader) throws IOException{
+        Mapper<String, ThingPicture> thingPictureMapper = new JsonImageConverter();
         ThingObject.ThingBuilder thingBuilder = new ThingObject.ThingBuilder();
         boolean emptyJson = true;
 
@@ -83,7 +94,11 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
                 thingBuilder.description(reader.nextString());
 
             } else if (name.equals(PICTURE_KEYNAME) && reader.peek() != JsonToken.NULL) {
-                thingBuilder.pict(reader.nextString());
+                try { // have to convert MappingException back to IOException
+                    thingBuilder.pict(thingPictureMapper.fromJson(reader.nextString()));
+                }catch (MappingException e) {
+                    throw new IOException("reading Picture from json failure", e);
+                }
 
             } else if (name.equals(STUCK_KEYNAME) && reader.peek() != JsonToken.NULL) {
                 thingBuilder.stuck(reader.nextBoolean());

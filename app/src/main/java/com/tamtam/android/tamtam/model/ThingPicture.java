@@ -6,10 +6,6 @@ package com.tamtam.android.tamtam.model;
 
 import android.graphics.Bitmap;
 
-import java.io.File;
-import java.net.URI;
-import java.util.Arrays;
-
 /**
  * Class representing a picture in our application
  *
@@ -20,30 +16,30 @@ public class ThingPicture {
     public static final int THUMBNAIL_WIDTH = 500;
     public static final int THUMBNAIL_HEIGHT = 500;
 
-    final Bitmap picureFile;
+    final Bitmap picureBitmap;
     final String pictureId;
 
-    public ThingPicture(String pictureId, Bitmap pictureFile) {
-        if (pictureFile != null
-                && pictureFile.getWidth() > 0 // todo verify bitmap not too big ?
+    public ThingPicture(String pictureId, Bitmap pictureBitmap) {
+        if (pictureBitmap != null
+                && pictureBitmap.getWidth() > 0 // todo verify bitmap not too big ?
                 && pictureId != null
                 && pictureId.isEmpty()){
-        this.picureFile = pictureFile;
+        this.picureBitmap = pictureBitmap;
         this.pictureId = pictureId;
         } else {
             throw new IllegalArgumentException("Tried to build an invalid ThingPicture");
         }
     }
 
-    Bitmap getPicureFile(){
-        return picureFile;
+    public Bitmap getPicureBitmap(){
+        return picureBitmap;
     }
-    String getPictureId() { return pictureId; }
+    public String getPictureId() { return pictureId; }
 
     @Override
     public String toString() {
         return "ThingPicture{" +
-                "picureFile (Width / Height) =" + picureFile.getWidth() + " / " + picureFile.getHeight() +
+                "picureBitmap (Width / Height) =" + picureBitmap.getWidth() + " / " + picureBitmap.getHeight() +
                 ", pictureId='" + pictureId + '\'' +
                 '}';
     }

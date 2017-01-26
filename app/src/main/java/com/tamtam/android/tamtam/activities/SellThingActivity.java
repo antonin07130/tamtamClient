@@ -27,9 +27,11 @@ import java.lang.reflect.Array;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 import static com.tamtam.android.tamtam.services.image.BitmapUtils.calculateInSampleSize;
 import static com.tamtam.android.tamtam.services.image.BitmapUtils.decodeSampledBitmapFromPath;
+import static java.util.UUID.randomUUID;
 
 
 public class SellThingActivity extends AppCompatActivity
@@ -210,21 +212,17 @@ public class SellThingActivity extends AppCompatActivity
         // todo move that to another class
 
         // build snapshot from image file
-        int[] fullImageBounds = BitmapUtils.readBounds(mPictURI.getPath());
-        int inSampleSize = BitmapUtils.calculateInSampleSize(fullImageBounds[0], fullImageBounds[1],
-                ThingPicture.THUMBNAIL_WIDTH, ThingPicture.THUMBNAIL_HEIGHT);
 
         // create ThingPicture
         Bitmap resizedBM = decodeSampledBitmapFromPath(mPictURI.getPath(),
                 ThingPicture.THUMBNAIL_WIDTH, ThingPicture.THUMBNAIL_HEIGHT);
 
         // create image id
-
-        String pictureId = "fakePictureID";
+        String pictureId = "fakePictureId_" + UUID.randomUUID().toString();
         // save ThingPicture
-
         ThingPicture fakePicture = new ThingPicture(pictureId, resizedBM);
-        
+
+
         // todo in the future : put full size image in imagerepo (to store somewhere)
 
 
@@ -235,7 +233,7 @@ public class SellThingActivity extends AppCompatActivity
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         // start building a thingobject with available info
         ThingObject.ThingBuilder thingBuilder = new ThingObject.ThingBuilder()
-                .thingId("NewThing" + timeStamp)
+                .thingId("NewThing_" + timeStamp)
                 .description(mDescription)
                 .position(mPosition)
                 .price(mPrice)
