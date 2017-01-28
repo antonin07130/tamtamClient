@@ -27,19 +27,19 @@ public class BitmapUtils {
 
 
     /**
-     * Loads a bitmap from an image file {@link URI} in an {@link ImageView}.
+     * Loads a bitmap from an image file's path in an {@link ImageView}.
      * Places a placeholder {@link Bitmap} while loading.
-     * @param imageURI final image to load in the {@link ImageView}
+     * @param imagePath final image to load in the {@link ImageView}
      * @param imageView to populate with the new image file
      * @param placeHolderBitmap placeholder {@link Bitmap} to display while loading the final image.
      */
-    public static void loadBitmap(URI imageURI, ImageView imageView, Bitmap placeHolderBitmap) {
-        if (cancelPotentialWork(imageURI, imageView)) {
-            final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+    public static void LoadBitmap(String imagePath, ImageView imageView, Bitmap placeHolderBitmap, int reqWidth,int reqHeight) {
+        if (cancelPotentialWork(imagePath, imageView)) {
+            final BitmapWorkerTask task = new BitmapWorkerTask(imageView, reqWidth, reqHeight);
             final AsyncDrawable asyncDrawable =
                     new AsyncDrawable(imageView.getContext().getResources(), placeHolderBitmap, task);
             imageView.setImageDrawable(asyncDrawable);
-            task.execute(imageURI);
+            task.execute(imagePath);
         }
     }
 
@@ -110,25 +110,28 @@ public class BitmapUtils {
 
 
     /**
-     * Asynchronous task to load an image from a {@link URI}, rescale the bitmap
+     * Asynchronous task to load an image from a path, rescale the bitmap
      * and set it in the destination {@link android.widget.ImageView}.
      * Following Android implementation directives from :
      * <a href="https://developer.android.com/training/displaying-bitmaps/process-bitmap.html">
      *     android doc to multitask images loading</a>
      */
-    public static class BitmapWorkerTask extends AsyncTask<URI, Void, Bitmap> {
+    public static class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
         private final WeakReference<ImageView> imageViewReference;
-        private URI data = null;
+        private String data = null;
+        private int reqWidth, reqHeight;
 
-        public BitmapWorkerTask(ImageView imageView) {
+        public BitmapWorkerTask(ImageView imageView, int reqWidth, int reqHeight) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
             imageViewReference = new WeakReference<ImageView>(imageView);
+            this.reqWidth = reqWidth;
+            this.reqHeight= reqHeight;
         }
 
         @Override
-        protected Bitmap doInBackground(URI... params) {
-                data = params[0]; // ImageURI
-                return decodeSampledBitmapFromPath(data.getPath(), 100, 100);
+        protected Bitmap doInBackground(String... params) {
+                data = params[0]; // ImagePath
+                return decodeSampledBitmapFromPath(data, reqWidth, reqHeight);
         }
 
         // Once complete, see if ImageView is still around and set bitmap.
@@ -185,11 +188,11 @@ public class BitmapUtils {
      * @return {@code true} if the old task has different data compared to the new one
      * and is stopped correctly.
      */
-    public static boolean cancelPotentialWork(URI data, ImageView imageView) {
+    public static boolean cancelPotentialWork(String data, ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
 
         if (bitmapWorkerTask != null) {
-            final URI bitmapData = bitmapWorkerTask.data;
+            final String bitmapData = bitmapWorkerTask.data;
             // If bitmapData is not yet set or it differs from the new data
             if (bitmapData == null || !bitmapData.equals(data)) {
                 // Cancel previous task

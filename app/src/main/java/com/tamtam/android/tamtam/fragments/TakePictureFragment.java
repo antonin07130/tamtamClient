@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.tamtam.android.tamtam.R;
+import com.tamtam.android.tamtam.services.image.BitmapUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -118,6 +119,7 @@ public class TakePictureFragment extends Fragment {
     //**************
     // the button to start pictures taking
     AppCompatImageButton mTakePictureIVBTN;
+    Bitmap mCurrentBitmap = null;
 
 
 
@@ -273,6 +275,7 @@ public class TakePictureFragment extends Fragment {
      */
     public void setImageButtonSrcToPic(final String currentPhotoPath, final ImageView imageView) {
 
+        
         Log.d(TAG, "setImageButtonSrcToPic: Trying to recompute photo Bitmap");
         if (currentPhotoPath == null || currentPhotoPath.isEmpty()) {
             Log.d(TAG, "setImageButtonSrcToPic: invalid currentPhotoPath");
@@ -292,6 +295,10 @@ public class TakePictureFragment extends Fragment {
             Log.d(TAG, "setImageButtonSrcToPic: invalid imageView Width or Height (is Layout Ready?)");
             return;
         }
+
+        BitmapUtils.LoadBitmap(currentPhotoPath, imageView, null,targetW,targetH);
+
+        /*
         // Get the dimensions of the bitmap
         final BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         // Does not decode but only set bitmap metadata
@@ -306,14 +313,17 @@ public class TakePictureFragment extends Fragment {
         // Actually decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inInputShareable = true;
         bmOptions.inPurgeable = true;
-        //bmOptions.inBitmap = true;
-
+        if (mCurrentBitmap != null) {
+            bmOptions.inBitmap = mCurrentBitmap;
+        }
         Log.d(TAG, "setImageButtonSrcToPic: New Bitmap computed");
         //bmOptions.inBitmap = true;
         imageView.setImageDrawable(null);
-        Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
-        imageView.setImageBitmap(bitmap);
+        mCurrentBitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+        imageView.setImageBitmap(mCurrentBitmap);
+        */
 
     }
 
@@ -328,4 +338,12 @@ public class TakePictureFragment extends Fragment {
         outState.putString(M_PREVIOUS_PHOTO_PATH_BK, mPreviousPhotoPath);
     }
 
+    @Override
+    public void onDestroy() {
+        if (mCurrentBitmap !=null){
+            Log.d(TAG, "onDestroy: recycling mCurrentBitmap");
+            mCurrentBitmap.recycle();
+        }
+        super.onDestroy();
+    }
 }

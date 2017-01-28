@@ -13,8 +13,8 @@ import android.graphics.Bitmap;
  *
  */
 public class ThingPicture {
-    public static final int THUMBNAIL_WIDTH = 500;
-    public static final int THUMBNAIL_HEIGHT = 500;
+    public static final int THUMBNAIL_WIDTH = 50;
+    public static final int THUMBNAIL_HEIGHT = 50;
 
     final Bitmap picureBitmap;
     final String pictureId;

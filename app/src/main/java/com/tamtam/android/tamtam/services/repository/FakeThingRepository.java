@@ -29,6 +29,7 @@ public class FakeThingRepository implements Repository<ThingObject> {
     public final static ConcurrentHashMap<String, String> inMemoryJsonThings =
             new ConcurrentHashMap<>(SIMULTANEOUS_ACCESSES);
 
+    /*
     //constant strings
     public static final String JSON_THING_STRING_1 = "{\"thingId\":\"thing1\"," +
             //"\"pict\":\"AAaaaIaAMaBASEa64aENCODEDaaaag==\"," +
@@ -49,12 +50,12 @@ public class FakeThingRepository implements Repository<ThingObject> {
             "\"position\":{\"lon\":7.12153,\"lat\":43.65839}," +
             "\"stuck\":false}";
 
-
+*/
     public FakeThingRepository(Mapper<String, ThingObject> jsonToModel) {
         this.jsonToModel = jsonToModel;
     }
 
-
+/*
     public void populateFakeThings() {
         try {
             // add 3 users to simulate a BIG database
@@ -69,7 +70,7 @@ public class FakeThingRepository implements Repository<ThingObject> {
         }
     }
 
-
+*/
     public List<ThingObject> queryAll() {
         // would have been a one liner with a Map function...
         ArrayList<ThingObject> objectList = new ArrayList<ThingObject>();

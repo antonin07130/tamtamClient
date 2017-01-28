@@ -1,7 +1,10 @@
 package com.tamtam.android.tamtam;
 
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.DrawableUtils;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +16,7 @@ import android.widget.TextView;
 
 
 import com.tamtam.android.tamtam.model.ThingObject;
+import com.tamtam.android.tamtam.services.image.BitmapUtils;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -71,7 +75,8 @@ public class ThingObjectAdapter extends RecyclerView.Adapter<ThingObjectAdapter.
             holder.mPriceTV.setText(currentThing.getPrice().getValue() +
                     " " + currentThing.getPrice().getCurrency().getSymbol());
             if (currentThing.hasPict()) {
-                holder.mPictIV.setImageResource(R.mipmap.ic_launcher);
+                holder.mPictIV.setImageBitmap(currentThing.getPict().getPicureBitmap());
+                //holder.mPictIV.setImageResource(R.mipmap.ic_launcher);
                 holder.mPictIV.setVisibility(View.VISIBLE);
             } else {
                 holder.mPictIV.setVisibility(View.GONE);

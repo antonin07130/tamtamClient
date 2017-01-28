@@ -76,7 +76,7 @@ public class ListThingsFragment extends Fragment {
         JsonThingConverter jsonConverter = new JsonThingConverter();
         mThingRepo = new FakeThingRepository(jsonConverter);
         // todo remove this fake data
-        mThingRepo.populateFakeThings(); // well this is cheating
+        //mThingRepo.populateFakeThings(); // well this is cheating
 
 
         // ***********************************************
