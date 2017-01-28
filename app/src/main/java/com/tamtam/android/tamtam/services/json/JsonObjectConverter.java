@@ -104,7 +104,7 @@ abstract class JsonObjectConverter<M> implements Mapper<String, M> {
 
 
 
-    private void writeObjectsToArray(JsonWriter writer,
+    protected void writeObjectsToArray(JsonWriter writer,
                                      Iterable<M> inputModelObjects) throws IOException {
         writer.beginArray();
         for (M modelObject : inputModelObjects) {
@@ -128,7 +128,7 @@ abstract class JsonObjectConverter<M> implements Mapper<String, M> {
         writer.endArray();
     }
 
-    private List<M> readObjectArray(JsonReader reader) throws IOException {
+    protected List<M> readObjectArray(JsonReader reader) throws IOException {
         List<M> messages = new ArrayList<>();
         reader.beginArray();
         while (reader.hasNext()) {

@@ -1,7 +1,10 @@
 package com.tamtam.android.tamtam.model;
 
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +12,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Currency;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static org.junit.Assert.*;
 
 /**
@@ -19,8 +23,11 @@ import static org.junit.Assert.*;
  */
 @RunWith(AndroidJUnit4.class)
 public class ThingObjectTest {
+    private static final String TAG = "ThingObjectTest";
 
-    private static String LOG_TAG = "ThingJSONObjectTest";
+    private static final Bitmap testBitmap1 =
+            BitmapFactory.decodeResource(getInstrumentation().getContext().getResources(),
+                    com.tamtam.android.tamtam.test.R.drawable.test_png_1);
 
     ThingObject testThingObject;
     PositionObject positionObject;
@@ -29,11 +36,13 @@ public class ThingObjectTest {
     @Test
     public void constructor() throws Exception {
 
+        Log.d(TAG, "constructor: " + testBitmap1);
+
         positionObject = new PositionObject(10.,15.);
 
         testThingObject = new ThingObject.ThingBuilder()
-                .thingId("thingId0")
-                .pict("base64encodedPicture")
+                .thingId("thingId1")
+                .pict(new ThingPicture("pictureId1", testBitmap1))
                 .description("test description")
                 .position(positionObject)
                 .price(new PriceObject(Currency.getInstance("EUR"), 23.5))
@@ -61,13 +70,13 @@ public class ThingObjectTest {
 
     @Test
     public void getThingId() throws Exception {
-        assertEquals("thingId0", testThingObject.getThingId());
+        assertEquals("thingId1", testThingObject.getThingId());
 
     }
 
     @Test
     public void getPict() throws Exception {
-        assertEquals("base64encodedPicture", testThingObject.getPict());
+        assertEquals(new ThingPicture("pictureId1", testBitmap1), testThingObject.getPict());
 
     }
 

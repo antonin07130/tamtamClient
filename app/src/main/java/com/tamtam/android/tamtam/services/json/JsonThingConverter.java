@@ -35,22 +35,25 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
 
 
     protected void writeObject(JsonWriter writer, ThingObject thing) throws IOException {
-
-        Mapper<String, ThingPicture> thingPictureMapper = new JsonImageConverter();
+        JsonObjectConverter<ThingPicture> thingPictureMapper = new JsonImageConverter();
 
         writer.beginObject();
+
         writer.name(ID_KEYNAME).value(thing.getThingId());
+
         writer.name(DESCRIPTION_KEYNAME).value(thing.getDescription());
+
         writer.name(POSITION_OBJ_KEYNAME);
         writePosition(writer, thing.getPosition());
+
         writer.name(PRICE_OBJ_KEYNAME);
         writePrice(writer, thing.getPrice());
-        try { // have to convert MappingException back to IOException
-            writer.name(PICTURE_KEYNAME).value(thingPictureMapper.toJson(thing.getPict()));
-        } catch (Exception e) {
-            throw new IOException("writing picture to json failed", e);
-        }
+
+        writer.name(PICTURE_KEYNAME);
+        thingPictureMapper.writeObject(writer,thing.getPict());
+
         writer.name(STUCK_KEYNAME).value(thing.getStuck());
+
         writer.endObject();
     }
 
@@ -72,12 +75,14 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
 
 
     protected ThingObject readObject(JsonReader reader) throws IOException{
-        Mapper<String, ThingPicture> thingPictureMapper = new JsonImageConverter();
+        JsonObjectConverter<ThingPicture> thingPictureMapper = new JsonImageConverter();
         ThingObject.ThingBuilder thingBuilder = new ThingObject.ThingBuilder();
-        boolean emptyJson = true;
 
         reader.beginObject();
-        if (reader.hasNext()) emptyJson = false;
+        // null json object "{}"
+        if (!reader.hasNext()) {
+            return null;
+        }
         while(reader.hasNext()) {
             String name = reader.nextName();
             if (name.equals(ID_KEYNAME)) {
@@ -94,11 +99,7 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
                 thingBuilder.description(reader.nextString());
 
             } else if (name.equals(PICTURE_KEYNAME) && reader.peek() != JsonToken.NULL) {
-                try { // have to convert MappingException back to IOException
-                    thingBuilder.pict(thingPictureMapper.fromJson(reader.nextString()));
-                }catch (MappingException e) {
-                    throw new IOException("reading Picture from json failure", e);
-                }
+                thingBuilder.pict(thingPictureMapper.readObject(reader));
 
             } else if (name.equals(STUCK_KEYNAME) && reader.peek() != JsonToken.NULL) {
                 thingBuilder.stuck(reader.nextBoolean());
@@ -110,11 +111,7 @@ public class JsonThingConverter extends JsonObjectConverter<ThingObject> {
         }
         reader.endObject();
 
-        // an option object to carry the reposne would have been more than welcome :
-        // 3 answers are possible : nothing, error, or valid_object
-        if (emptyJson) {
-            return null; // nothing
-        } else if (thingBuilder.isValid()) {
+        if (thingBuilder.isValid()) {
             return thingBuilder.build(); // valid object
         } else{
             throw new IOException("Unable to build a valid Thing from json"); // error

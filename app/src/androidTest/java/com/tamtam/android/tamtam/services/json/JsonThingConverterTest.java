@@ -1,9 +1,13 @@
 package com.tamtam.android.tamtam.services.json;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import com.tamtam.android.tamtam.JsonThingTestData;
 import com.tamtam.android.tamtam.model.ThingObject;
 import com.tamtam.android.tamtam.model.PositionObject;
 import com.tamtam.android.tamtam.model.PriceObject;
+import com.tamtam.android.tamtam.model.ThingPicture;
 import com.tamtam.android.tamtam.model.UserObject;
 import com.tamtam.android.tamtam.services.json.JsonThingConverter;
 
@@ -19,12 +23,16 @@ import java.util.Arrays;
 import java.util.Currency;
 import java.util.List;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static com.tamtam.android.tamtam.JsonThingTestData.*;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+
+import com.tamtam.android.tamtam.test.R;
 
 
 /**
@@ -40,13 +48,27 @@ public class JsonThingConverterTest {
             JsonThingTestData.JSON_THING_STRING_2 + "," +
             JsonThingTestData.JSON_THING_STRING_3 + "]";
 
+/*
+    private static final Bitmap testBitmap1 =
+            BitmapFactory.decodeResource(getInstrumentation().getContext().getResources(),
+                                         R.drawable.test_png_1);
+
+    private static final Bitmap testBitmap2 =
+            BitmapFactory.decodeResource(getInstrumentation().getContext().getResources(),
+                    R.drawable.test_png_2);
+
+    private static final Bitmap testBitmap3 =
+            BitmapFactory.decodeResource(getInstrumentation().getContext().getResources(),
+                    R.drawable.test_png_3);
+*/
+
     private PositionObject positionObject1 =
             new PositionObject(7.05289, 43.6166);
     private PriceObject priceObject1 =
             new PriceObject(Currency.getInstance("EUR"), 10.10);
     private ThingObject thingObject1 = new ThingObject.ThingBuilder()
             .thingId("thing1")
-            .pict("AAaaaIaAMaBASEa64aENCODEDaaaag==")
+            .pict(new ThingPicture("picture1", JsonThingTestData.testBitmap1))
             .description("cest un premier truc")
             .position(positionObject1)
             .price(priceObject1)
@@ -55,7 +77,7 @@ public class JsonThingConverterTest {
 
     private ThingObject thingObject2 = new ThingObject.ThingBuilder()
             .thingId("thing2")
-            .pict("AAaaaIaAMaBASEa64aENCODEDaaaag==")
+            .pict(new ThingPicture("picture2", JsonThingTestData.testBitmap2))
             .description("cest un deuxieme truc")
             .position(new PositionObject(7.05334, 43.61664))
             .price(new PriceObject(Currency.getInstance("EUR"), 20.20))
@@ -64,7 +86,7 @@ public class JsonThingConverterTest {
 
     private ThingObject thingObject3 = new ThingObject.ThingBuilder()
             .thingId("thing3")
-            .pict("AAaaaIaAMaBASEa64aENCODEDaaaag==")
+            .pict(new ThingPicture("picture3", JsonThingTestData.testBitmap3))
             .description("cest un troisieme truc")
             .position(new PositionObject(7.12153, 43.65839))
             .price(new PriceObject(Currency.getInstance("EUR"), 30.30))
@@ -79,6 +101,7 @@ public class JsonThingConverterTest {
     private JsonThingConverter jsonThingConverter;
 
     @Before
+    @Test
     public void constructor() throws Exception {
         jsonThingConverter = new JsonThingConverter();
     }
@@ -136,8 +159,17 @@ public class JsonThingConverterTest {
 
     @Test
     public void fromJsonArray() throws Exception{
-        List<ThingObject> generatedThingsList = jsonThingConverter.fromJsonArray(jsonThingsArray);
-        assertEquals(thingObjects, generatedThingsList);
+        List<ThingObject> generatedThingList = jsonThingConverter.fromJsonArray(jsonThingsArray);
+        assertEquals(thingObjects, generatedThingList);
+    }
+
+
+    @Test
+    public void toJsonArrayFromJsonArray() throws Exception {
+        List<ThingObject> generatedThingList =
+                jsonThingConverter.fromJsonArray(
+                        jsonThingConverter.toJsonArray(thingObjects));
+        assertEquals(thingObjects, generatedThingList);
     }
 
     @Test
@@ -180,6 +212,7 @@ public class JsonThingConverterTest {
      * @param test json string to verify.
      * @return true if parsable by {@link JSONObject} or {@link JSONArray}, false otherwise
      */
+    /*
     boolean ParsableJson(String test) {
         try {
             new JSONObject(test);
@@ -191,5 +224,5 @@ public class JsonThingConverterTest {
             }
         }
         return true;
-    }
+    }*/
 }

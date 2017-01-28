@@ -31,17 +31,22 @@ import java.util.UUID;
 public class JsonImageConverter extends JsonObjectConverter<ThingPicture> {
     private static final String TAG = "JsonImageConverter";
 
-    private static final String PICTUREID_KEYNAME = "pictureId";
-    private static final String PICTUREENCODED_KEYNAME = "picture_bitmap";
+    public static final String PICTUREID_KEYNAME = "pictureId";
+    public static final String PICTUREENCODED_KEYNAME = "bitmap";
 
 
     @Override
     protected ThingPicture readObject(JsonReader reader) throws IOException {
         Bitmap parsedBitmap = null;
+        boolean emptyJson = true;
 
         String parsedPictureId = null;
 
         reader.beginObject();
+        // null json object "{}"
+        if (!reader.hasNext()) {
+            return null;
+        }
         while(reader.hasNext()) {
             String name = reader.nextName();
             switch (name) {
@@ -58,7 +63,11 @@ public class JsonImageConverter extends JsonObjectConverter<ThingPicture> {
         }
         reader.endObject();
 
-        return new ThingPicture(parsedPictureId, parsedBitmap);
+        try {
+            return new ThingPicture(parsedPictureId, parsedBitmap);
+        } catch (IllegalArgumentException e){
+            throw new IOException("Parsing Json ThingPicture error", e);
+        }
     }
 
 
@@ -113,6 +122,6 @@ public class JsonImageConverter extends JsonObjectConverter<ThingPicture> {
     {
         ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
         image.compress(compressFormat, quality, byteArrayOS);
-        return Base64.encodeToString(byteArrayOS.toByteArray(), Base64.DEFAULT);
+        return Base64.encodeToString(byteArrayOS.toByteArray(), Base64.NO_WRAP | Base64.URL_SAFE);
     }
 }

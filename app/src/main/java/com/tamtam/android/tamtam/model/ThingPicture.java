@@ -21,15 +21,18 @@ public class ThingPicture {
 
     public ThingPicture(String pictureId, Bitmap pictureBitmap) {
         if (pictureBitmap != null
-                && pictureBitmap.getWidth() > 0 // todo verify bitmap not too big ?
+                && (pictureBitmap.getWidth() > 0) // todo verify bitmap not too big ?
                 && pictureId != null
-                && pictureId.isEmpty()){
+                && !pictureId.isEmpty()
+                ){
         this.picureBitmap = pictureBitmap;
         this.pictureId = pictureId;
         } else {
             throw new IllegalArgumentException("Tried to build an invalid ThingPicture");
         }
     }
+
+
 
     public Bitmap getPicureBitmap(){
         return picureBitmap;
@@ -39,8 +42,26 @@ public class ThingPicture {
     @Override
     public String toString() {
         return "ThingPicture{" +
-                "picureBitmap (Width / Height) =" + picureBitmap.getWidth() + " / " + picureBitmap.getHeight() +
-                ", pictureId='" + pictureId + '\'' +
+                "pictureId='" + pictureId + '\'' +
+                ", picureBitmap (Width / Height) =" + picureBitmap.getWidth() +
+                                              " / " + picureBitmap.getHeight() +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ThingPicture that = (ThingPicture) o;
+
+        return pictureId.equals(that.pictureId);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return pictureId.hashCode();
     }
 }
