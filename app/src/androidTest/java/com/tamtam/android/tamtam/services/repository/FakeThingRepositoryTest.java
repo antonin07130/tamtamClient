@@ -40,10 +40,7 @@ public class FakeThingRepositoryTest {
         fakeThingRepo.add(thing1);
         fakeThingRepo.add(thing2);
         fakeThingRepo.add(thing3);
-        /*
-        assertEquals(fakeThingRepo.query(new Specification() {
-        }));
-        */
+
         assertTrue("TODO : implement this test",false);
     }
 
@@ -53,7 +50,7 @@ public class FakeThingRepositoryTest {
         HashSet<ThingObject> thingObjects = new HashSet<>(Arrays.asList(thing1,thing2,thing3));
         fakeThingRepo.add(thingObjects);
 
-        assertEquals(thingObjects, new HashSet<>(fakeThingRepo.queryAll()));
+        assertEquals(thingObjects, new HashSet<>(fakeThingRepo.getAll()));
     }
 
     @Test
@@ -104,7 +101,7 @@ public class FakeThingRepositoryTest {
 
         fakeThingRepo.remove(thing2);
 
-        assertEquals(2, fakeThingRepo.queryAll().size());
+        assertEquals(2, fakeThingRepo.getAll().size());
         assertNull(fakeThingRepo.queryOne(thing2));
     }
 

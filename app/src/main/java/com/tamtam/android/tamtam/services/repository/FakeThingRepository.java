@@ -29,49 +29,19 @@ public class FakeThingRepository implements Repository<ThingObject> {
     public final static ConcurrentHashMap<String, String> inMemoryJsonThings =
             new ConcurrentHashMap<>(SIMULTANEOUS_ACCESSES);
 
-    /*
-    //constant strings
-    public static final String JSON_THING_STRING_1 = "{\"thingId\":\"thing1\"," +
-            //"\"pict\":\"AAaaaIaAMaBASEa64aENCODEDaaaag==\"," +
-            "\"description\":\"cest un premier truc\"," +
-            "\"price\":{\"currency\":\"USD\",\"price\":10.10}," +
-            "\"position\":{\"lon\":7.05289,\"lat\":43.6166}," +
-            "\"stuck\":false}";
-    public static final String JSON_THING_STRING_2 = "{\"thingId\":\"thing2\"," +
-            //"\"pict\":\"AAaaaIaAMaBASEa64aENCODEDaaaag==\"," +
-            "\"description\":\"cest un deuxieme truc\"," +
-            "\"price\":{\"currency\":\"EUR\",\"price\":20.20}," +
-            "\"position\":{\"lon\":7.05334,\"lat\":43.61664}," +
-            "\"stuck\":false}";
-    public static final String JSON_THING_STRING_3 = "{\"thingId\":\"thing3\"," +
-            //"\"pict\":\"AAaaaIaAMaBASEa64aENCODEDaaaag==\"," +
-            "\"description\":\"cest un troisieme truc\"," +
-            "\"price\":{\"currency\":\"INR\",\"price\":30.30}," +
-            "\"position\":{\"lon\":7.12153,\"lat\":43.65839}," +
-            "\"stuck\":false}";
 
-*/
     public FakeThingRepository(Mapper<String, ThingObject> jsonToModel) {
         this.jsonToModel = jsonToModel;
     }
 
-/*
-    public void populateFakeThings() {
-        try {
-            // add 3 users to simulate a BIG database
-            inMemoryJsonThings.put(jsonToModel.fromJson(JSON_THING_STRING_3).getThingId(),
-                    JSON_THING_STRING_3);
-            inMemoryJsonThings.put(jsonToModel.fromJson(JSON_THING_STRING_2).getThingId(),
-                    JSON_THING_STRING_2);
-            inMemoryJsonThings.put(jsonToModel.fromJson(JSON_THING_STRING_1).getThingId(),
-                    JSON_THING_STRING_1);
-        } catch (MappingException e) {
-            e.printStackTrace();
-        }
-    }
 
-*/
-    public List<ThingObject> queryAll() {
+    /**
+     * returns all users in the repository regardless of specification argument
+     *
+     * @return all users in this repository
+     */
+    @Override
+    public List<ThingObject> getAll() {
         // would have been a one liner with a Map function...
         ArrayList<ThingObject> objectList = new ArrayList<ThingObject>();
         try {
@@ -97,21 +67,6 @@ public class FakeThingRepository implements Repository<ThingObject> {
             }
         }
         return thing;
-    }
-
-
-    /**
-     * returns all users in the repository regardless of specification argument
-     *
-     * @param querySpecification unused {@link Specification}
-     * @return all users in this repository
-     */
-    @Override
-    public List<ThingObject> query(Specification querySpecification) {
-        // cast to specifications accepted by this repository
-        // final FakeSpecification fakeSpecification = (FakeSpecification) querySpecificationl;
-
-        return queryAll();
     }
 
 
@@ -143,8 +98,29 @@ public class FakeThingRepository implements Repository<ThingObject> {
         inMemoryJsonThings.remove(item.getThingId());
     }
 
+
     @Override
-    public void remove(Specification querySpecification) {
+    public void removeAll() {
         inMemoryJsonThings.clear();
+    }
+
+    @Override
+    public List<ThingObject> getByIds(Iterable<String> ids) {
+        return null;
+    }
+
+    @Override
+    public ThingObject getById(String id) {
+        return null;
+    }
+
+    @Override
+    public void removeById(String id) {
+
+    }
+
+    @Override
+    public void removeByIds(Iterable<String> ids) {
+
     }
 }

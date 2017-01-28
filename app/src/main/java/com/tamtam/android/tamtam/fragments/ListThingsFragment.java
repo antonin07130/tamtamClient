@@ -115,7 +115,7 @@ public class ListThingsFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         Log.d(TAG, "onCreateView: refresh data");
-        mItemsAdapter = new ThingObjectAdapter(mThingRepo.queryAll());
+        mItemsAdapter = new ThingObjectAdapter(mThingRepo.getAll());
         // data is all fresh from creation
         mDataRefreshed = true;
         Log.d(TAG, "onCreateView: set mDataRefreshed flag to true");
@@ -139,7 +139,7 @@ public class ListThingsFragment extends Fragment {
             // todo remove ref to mThingList
             //mThingList.clear();
             //mThingList.addAll(mThingRepo.queryAll());
-            mItemsAdapter.swap(mThingRepo.queryAll());
+            mItemsAdapter.swap(mThingRepo.getAll());
             Log.d(TAG, "onResume: set mDataRefreshed to true");
             mDataRefreshed = true;
         }

@@ -207,22 +207,4 @@ public class JsonThingConverterTest {
         }
     }
 
-    /***
-     * ugly utility function to verify that a Json String is parsable
-     * @param test json string to verify.
-     * @return true if parsable by {@link JSONObject} or {@link JSONArray}, false otherwise
-     */
-    /*
-    boolean ParsableJson(String test) {
-        try {
-            new JSONObject(test);
-        } catch (JSONException ex) {
-            try {
-                new JSONArray(test);
-            } catch (JSONException ex1) {
-                return false;
-            }
-        }
-        return true;
-    }*/
 }
