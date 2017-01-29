@@ -16,14 +16,14 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tamtam.android.tamtam.services.json;
+package com.tamtam.android.tamtam.services.repository;
+
+import com.tamtam.android.tamtam.model.ThingObject;
 
 /**
- * This exception is raised when something bad happened trying to write Json.
- **/
-public class MappingException extends Exception{
-    public MappingException() {}
-    public MappingException(String msg) { super(msg); }
-    public MappingException(Throwable cause) { super(cause); }
-    public MappingException(String msg, Throwable cause) { super(msg, cause); }
+ * Created by antoninpa on 28/01/17.
+ */
+
+public interface IThingRepository extends Repository<ThingObject> {
+
 }

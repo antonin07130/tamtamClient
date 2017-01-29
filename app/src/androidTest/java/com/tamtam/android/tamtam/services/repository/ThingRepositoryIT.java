@@ -23,25 +23,60 @@ import com.tamtam.android.tamtam.model.ThingObject;
 
 import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.io.File;
-import java.net.CookieHandler;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 
 
 /**
  * Created by antoninpa on 28/01/17.
  */
-public class ThingRepositoryMemoryCacheIT {
 
+/**
+ * Runs interface tests on following implementations of IThingRepository :
+ *  - {@link ThingRepositoryMemoryCache}
+ *  - ...
+ *  to verify that they conform to the base API.
+ *
+ *  More specific tests (testing responses delays etcc...) can be found in
+ *  - {@link ThingRepositoryMemoryCacheIT}
+ *  - ...
+ *
+ *  implementation tips from :
+ *  <a href="https://moepad.wordpress.com/tutorials/testing-multiple-interface-implementations-w-junit-4/">
+ *      moepad tutorials
+ *  </a>, thanks to them !
+ *
+ */
+@RunWith(Parameterized.class)
+public class ThingRepositoryIT {
+
+
+    private IThingRepository mThingRepository;
+
+
+    // will generate implementations of IThingRepository
+    @Parameters
+    public static Collection<Object[]> getParameters() {
+        return Arrays.asList(new Object[][] {
+                // this is where other implementations of IThingRepository are added.
+                { new ThingRepositoryMemoryCache() } //, { new ThingRepositoryServer() }
+        });
+    }
+
+    // test class constructor : takes the getParameters value as argument
+    public ThingRepositoryIT(IThingRepository thingRepository){
+        this.mThingRepository = thingRepository;
+    }
 
     // would be better to use getContext and have a test context with different folders...
     File cacheDir = getInstrumentation().getTargetContext().getCacheDir();
@@ -93,7 +128,7 @@ public class ThingRepositoryMemoryCacheIT {
 
         Collection<ThingObject> fromRepo = memCache.getByIds(Ids2and3);
         HashSet<ThingObject> fromRepoSet = new HashSet<>(fromRepo);
-        // we use Hashsets because order does not matter
+        // we use HashSets because order does not matter
         assertEquals(new HashSet<>(thingObjects2and3), fromRepoSet);
 
     }
