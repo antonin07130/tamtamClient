@@ -1,18 +1,16 @@
 package com.tamtam.android.tamtam.services.repository;
 
-import com.tamtam.android.tamtam.JsonThingTestData;
 import com.tamtam.android.tamtam.model.PositionObject;
 import com.tamtam.android.tamtam.model.ThingObject;
 
-import static org.mockito.Mockito.*;
-
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.net.CookieHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -24,7 +22,7 @@ import static org.junit.Assert.*;
 /**
  * Created by antoninpa on 28/01/17.
  */
-public class ThingRepositoryDiskCacheIT {
+public class ThingRepositoryMemoryCacheIT {
 
 
     // would be better to use getContext and have a test context with different folders...
@@ -62,63 +60,62 @@ public class ThingRepositoryDiskCacheIT {
 
     @Test
     public void constructor() throws Exception {
-        File cacheDir = getInstrumentation().getContext().getCacheDir();
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        //File cacheDir = getInstrumentation().getContext().getCacheDir();
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
     }
 
 
     @Test
     public void getByIds() throws Exception {
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
 
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        memCache.add(thingObject1);
+        memCache.add(thingObject2);
+        memCache.add(thingObject3);
 
-        diskCache.add(thingObject1);
-        diskCache.add(thingObject2);
-        diskCache.add(thingObject3);
-
-        List<ThingObject> fromRepo = diskCache.getByIds(Ids2and3);
-
+        Collection<ThingObject> fromRepo = memCache.getByIds(Ids2and3);
+        HashSet<ThingObject> fromRepoSet = new HashSet<>(fromRepo);
         // we use Hashsets because order does not matter
-        assertEquals(new HashSet<>(thingObjects2and3), new HashSet<>(fromRepo));
+        assertEquals(new HashSet<>(thingObjects2and3), fromRepoSet);
 
     }
 
     @Test
     public void getById() throws Exception {
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
 
-        diskCache.add(thingObject1);
-        diskCache.add(thingObject2);
-        diskCache.add(thingObject3);
+        memCache.add(thingObject1);
+        memCache.add(thingObject2);
+        memCache.add(thingObject3);
 
-        ThingObject fromRepo = diskCache.getById(thingObject2.getThingId());
+        ThingObject fromRepo = memCache.getById(thingObject2.getThingId());
         assertEquals(thingObject2,fromRepo);
 
-        fromRepo = diskCache.getById(thingObject3.getThingId());
+        fromRepo = memCache.getById(thingObject3.getThingId());
         assertEquals(thingObject3,fromRepo);
     }
 
     @Test
     public void add() throws Exception {
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
 
-        diskCache.add(thingObject1);
+        memCache.add(thingObject1);
 
-        List<ThingObject> fromRepo = diskCache.getAll();
+        Collection<ThingObject> fromRepo = memCache.getAll();
         assertEquals(new HashSet<ThingObject>(Arrays.asList(thingObject1)),
                      new HashSet<ThingObject>(fromRepo));
 
 
-        diskCache.add(thingObject2);
+        memCache.add(thingObject2);
 
-        fromRepo = diskCache.getAll();
+        fromRepo = memCache.getAll();
         assertEquals(new HashSet<ThingObject>(thingObjects1and2),
                      new HashSet<ThingObject>(fromRepo));
 
 
-        diskCache.add(thingObject3);
+        memCache.add(thingObject3);
 
-        fromRepo = diskCache.getAll();
+        fromRepo = memCache.getAll();
         assertEquals(new HashSet<ThingObject>(thingObjects123),
                      new HashSet<ThingObject>(fromRepo));
 
@@ -131,47 +128,47 @@ public class ThingRepositoryDiskCacheIT {
 
     @Test
     public void update() throws Exception {
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
 
-        diskCache.add(thingObject1);
-        diskCache.add(thingObject2);
-        diskCache.add(thingObject3);
+        memCache.add(thingObject1);
+        memCache.add(thingObject2);
+        memCache.add(thingObject3);
 
         assertEquals(thingObject1.getThingId(), thingObject1bis.getThingId());
-        assertEquals( positionObject1, diskCache.getById(thingObject1.getThingId()).getPosition());
+        assertEquals( positionObject1, memCache.getById(thingObject1.getThingId()).getPosition());
 
 
-        diskCache.update(thingObject1bis);
+        memCache.update(thingObject1bis);
 
         assertEquals( positionObject1bis,
-                      diskCache.getById(thingObject1bis.getThingId()).getPosition());
+                      memCache.getById(thingObject1bis.getThingId()).getPosition());
 
         // no change on other items
         assertEquals( thingObject2.getPosition(),
-                      diskCache.getById(thingObject2.getThingId()).getPosition());
+                      memCache.getById(thingObject2.getThingId()).getPosition());
         assertEquals( thingObject1.getPrice(),
-                diskCache.getById(thingObject1.getThingId()).getPrice());
+                memCache.getById(thingObject1.getThingId()).getPrice());
     }
 
     @Test
     public void remove() throws Exception {
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
 
-        diskCache.add(thingObject1);
-        diskCache.add(thingObject2);
-        diskCache.add(thingObject3);
+        memCache.add(thingObject1);
+        memCache.add(thingObject2);
+        memCache.add(thingObject3);
 
 
-        diskCache.remove(thingObject2);
+        memCache.remove(thingObject2);
 
-        List<ThingObject> fromRepo = diskCache.getAll();
+        Collection<ThingObject> fromRepo = memCache.getAll();
         assertEquals(new HashSet<>(thingObjects1and3),
                      new HashSet<>(fromRepo));
 
 
-        diskCache.remove(thingObject3);
+        memCache.remove(thingObject3);
 
-        fromRepo = diskCache.getAll();
+        fromRepo = memCache.getAll();
         assertEquals(new HashSet<>(Arrays.asList(thingObject1)),
                      new HashSet<>(fromRepo));
 
@@ -181,32 +178,32 @@ public class ThingRepositoryDiskCacheIT {
     @After
     @Test
     public void removeAll() throws Exception {
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
 
         // cleanup after test
-        diskCache.removeAll();
-        List<ThingObject> emptyList = new ArrayList<>();
-        assertEquals(emptyList, diskCache.getAll());
+        memCache.removeAll();
+        //Collection<ThingObject> emptyList = new ArrayList<>();
+        assertEquals(0, memCache.getAll().size());
     }
 
     @Test
     public void removeById() throws Exception {
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
 
-        diskCache.add(thingObject1);
-        diskCache.add(thingObject2);
-        diskCache.add(thingObject3);
+        memCache.add(thingObject1);
+        memCache.add(thingObject2);
+        memCache.add(thingObject3);
 
-        diskCache.removeById(thingObject2.getThingId());
+        memCache.removeById(thingObject2.getThingId());
 
-        List<ThingObject> fromRepo = diskCache.getAll();
+        Collection<ThingObject> fromRepo = memCache.getAll();
         assertEquals(new HashSet<>(thingObjects1and3),
                 new HashSet<>(fromRepo));
 
 
-        diskCache.removeById(thingObject3.getThingId());
+        memCache.removeById(thingObject3.getThingId());
 
-        fromRepo = diskCache.getAll();
+        fromRepo = memCache.getAll();
         assertEquals(new HashSet<>(Arrays.asList(thingObject1)),
                 new HashSet<>(fromRepo));
 
@@ -214,21 +211,21 @@ public class ThingRepositoryDiskCacheIT {
 
     @Test
     public void removeByIds() throws Exception {
-        ThingRepositoryDiskCache diskCache = new ThingRepositoryDiskCache(cacheDir);
+        ThingRepositoryMemoryCache memCache = new ThingRepositoryMemoryCache();
 
-        diskCache.add(thingObject1);
-        diskCache.add(thingObject2);
-        diskCache.add(thingObject3);
+        memCache.add(thingObject1);
+        memCache.add(thingObject2);
+        memCache.add(thingObject3);
 
-        diskCache.removeByIds(Ids1and2);
+        memCache.removeByIds(Ids1and2);
 
-        List<ThingObject> fromRepo = diskCache.getAll();
-        assertEquals(new HashSet<>(Arrays.asList(thingObject1)),
+        Collection<ThingObject> fromRepo = memCache.getAll();
+        assertEquals(new HashSet<>(Arrays.asList(thingObject3)),
                 new HashSet<>(fromRepo));
 
 
-        diskCache.removeByIds(Ids2and3);
-        fromRepo = diskCache.getAll();
+        memCache.removeByIds(Ids2and3);
+        fromRepo = memCache.getAll();
         assertEquals(new HashSet<ThingObject>(), // Empty
                      new HashSet<>(fromRepo));
 

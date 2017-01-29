@@ -1,5 +1,6 @@
 package com.tamtam.android.tamtam.services.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -14,9 +15,9 @@ public interface Repository<M> {
      * Get the items matching the querySpecification from the repository.
      *
      * @param ids of items to retrieve.
-     * @return a {@link List} of items of type M that match the querySpecification.
+     * @return a {@link Iterable} of items of type M that match the querySpecification.
      */
-    public List<M> getByIds(Iterable<String> ids);
+    Iterable<M> getByIds(Iterable<String> ids);
 
 
     /**
@@ -25,20 +26,20 @@ public interface Repository<M> {
      * @param id
      * @return item of type M if it exists in this repository or null.
      */
-    public M getById(String id);
+    M getById(String id);
 
 
     /**
      * get all items from the repository.
      * @return all items of type M in a {@link List}.
      */
-    public List<M> getAll();
+    Iterable<M> getAll();
 
 
 
     /**
      * Add one item to the repository.
-     *
+     * follows upsert semantics (add or update if already existing with same id)
      * @param item item to add.
      */
     void add(M item);
