@@ -32,6 +32,7 @@ import org.junit.runners.Parameterized.Parameters;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -63,7 +64,7 @@ import static org.junit.Assert.assertNotNull;
  *
  */
 @RunWith(Parameterized.class)
-public class ThingRepositoryIT {
+public class ThingRepositoryIT_sub {
     private static String TAG = "ThingRepositoryIT";
 
     private IThingRepository mThingRepository;
@@ -80,12 +81,12 @@ public class ThingRepositoryIT {
 
         return Arrays.asList(new Object[][] {
                 // this is where other implementations of IThingRepository are added.
-                { new ThingRepositoryMemoryCache() } , { new ThingRepositoryServer(URIparam) }
+                { new ThingRepositoryServer(URIparam) }
         });
     }
 
     // test class constructor : takes the getParameters value as argument
-    public ThingRepositoryIT(IThingRepository thingRepository){
+    public ThingRepositoryIT_sub(IThingRepository thingRepository){
         this.mThingRepository = thingRepository;
     }
 
@@ -175,8 +176,8 @@ public class ThingRepositoryIT {
         Collection<ThingObject> fromRepoCollection = repo.getByIds(
                 Arrays.asList(thingObject1.getThingId(),
                               thingObject2.getThingId()));
-        assertEquals(new HashSet<>(thingObjects1and2),
-                     new HashSet<>(fromRepoCollection));
+        assertEquals(new HashSet<ThingObject>(thingObjects1and2),
+                     new HashSet<ThingObject>(fromRepoCollection));
 
 
         repo.add(thingObject3);
@@ -185,11 +186,11 @@ public class ThingRepositoryIT {
                 Arrays.asList(thingObject1.getThingId(),
                               thingObject2.getThingId(),
                               thingObject3.getThingId()));
-        assertEquals(new HashSet<>(thingObjects123),
-                     new HashSet<>(fromRepoCollection));
+        assertEquals(new HashSet<ThingObject>(thingObjects123),
+                     new HashSet<ThingObject>(fromRepoCollection));
 
     }
-
+/*
     @Test
     public void add1() throws Exception {
 
@@ -230,40 +231,29 @@ public class ThingRepositoryIT {
 
         repo.remove(thingObject2);
 
-        Collection<ThingObject> fromRepo = repo.getByIds(
-                Arrays.asList(thingObject1.getThingId(),
-                        thingObject2.getThingId(),
-                        thingObject3.getThingId()));
+        Collection<ThingObject> fromRepo = repo.getAll();
         assertEquals(new HashSet<>(thingObjects1and3),
                      new HashSet<>(fromRepo));
 
 
         repo.remove(thingObject3);
 
-        fromRepo = repo.getByIds(
-                Arrays.asList(thingObject1.getThingId(),
-                        thingObject2.getThingId(),
-                        thingObject3.getThingId()));
+        fromRepo = repo.getAll();
         assertEquals(new HashSet<>(Arrays.asList(thingObject1)),
                      new HashSet<>(fromRepo));
 
     }
 
     // used as a test cleanup
-    @After
     @Test
-    public void removeThing123() throws Exception {
+    public void removeAll() throws Exception {
         IThingRepository repo = mThingRepository;
 
         // cleanup after test
-        repo.removeByIds( Arrays.asList(thingObject1.getThingId(),
-                                        thingObject2.getThingId(),
-                                        thingObject3.getThingId()));
-        Collection<ThingObject> fromRepo = repo.getByIds( Arrays.asList(thingObject1.getThingId(),
-                                                                        thingObject2.getThingId(),
-                                                                        thingObject3.getThingId()));
-        assertNotNull(fromRepo);
-        assertEquals(0, fromRepo.size());
+        repo.removeAll();
+        //Collection<ThingObject> emptyList = new ArrayList<>();
+        assertNotNull(repo.getAll());
+        assertEquals(0, repo.getAll().size());
     }
 
     @Test
@@ -276,18 +266,14 @@ public class ThingRepositoryIT {
 
         repo.removeById(thingObject2.getThingId());
 
-        Collection<ThingObject> fromRepo = repo.getByIds(Arrays.asList(thingObject1.getThingId(),
-                                                                       thingObject2.getThingId(),
-                                                                       thingObject3.getThingId()));
+        Collection<ThingObject> fromRepo = repo.getAll();
         assertEquals(new HashSet<>(thingObjects1and3),
                 new HashSet<>(fromRepo));
 
 
         repo.removeById(thingObject3.getThingId());
 
-        fromRepo = repo.getByIds(Arrays.asList(thingObject1.getThingId(),
-                                               thingObject2.getThingId(),
-                                               thingObject3.getThingId()));
+        fromRepo = repo.getAll();
         assertEquals(new HashSet<>(Arrays.asList(thingObject1)),
                 new HashSet<>(fromRepo));
 
@@ -303,20 +289,16 @@ public class ThingRepositoryIT {
 
         repo.removeByIds(Ids1and2);
 
-        Collection<ThingObject> fromRepo = repo.getByIds(Arrays.asList(thingObject1.getThingId(),
-                                                                       thingObject2.getThingId(),
-                                                                       thingObject3.getThingId()));
+        Collection<ThingObject> fromRepo = repo.getAll();
         assertEquals(new HashSet<>(Arrays.asList(thingObject3)),
                 new HashSet<>(fromRepo));
 
 
         repo.removeByIds(Ids2and3);
-        fromRepo = repo.getByIds(Arrays.asList(thingObject1.getThingId(),
-                                               thingObject2.getThingId(),
-                                               thingObject3.getThingId()));
+        fromRepo = repo.getAll();
         assertEquals(new HashSet<ThingObject>(), // Empty
                      new HashSet<>(fromRepo));
 
     }
-
+*/
 }

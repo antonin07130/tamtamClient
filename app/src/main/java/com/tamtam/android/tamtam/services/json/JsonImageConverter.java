@@ -50,7 +50,7 @@ public class JsonImageConverter extends JsonObjectConverter<ThingPicture> {
     private static final String TAG = "JsonImageConverter";
 
     public static final String PICTUREID_KEYNAME = "pictureId";
-    public static final String PICTUREENCODED_KEYNAME = "bitmap";
+    public static final String PICTUREENCODED_KEYNAME = "pictureData";
 
 
     @Override

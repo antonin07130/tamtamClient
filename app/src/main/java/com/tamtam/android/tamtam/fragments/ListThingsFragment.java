@@ -33,6 +33,7 @@ import com.tamtam.android.tamtam.model.ThingObject;
 import com.tamtam.android.tamtam.services.json.JsonThingConverter;
 import com.tamtam.android.tamtam.services.repository.FakeThingRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO DEBUG
@@ -133,7 +134,7 @@ public class ListThingsFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         Log.d(TAG, "onCreateView: refresh data");
-        mItemsAdapter = new ThingObjectAdapter(mThingRepo.getAll());
+        mItemsAdapter = new ThingObjectAdapter(new ArrayList(mThingRepo.getAll()));
         // data is all fresh from creation
         mDataRefreshed = true;
         Log.d(TAG, "onCreateView: set mDataRefreshed flag to true");
@@ -157,7 +158,7 @@ public class ListThingsFragment extends Fragment {
             // todo remove ref to mThingList
             //mThingList.clear();
             //mThingList.addAll(mThingRepo.queryAll());
-            mItemsAdapter.swap(mThingRepo.getAll());
+            mItemsAdapter.swap(new ArrayList(mThingRepo.getAll()));
             Log.d(TAG, "onResume: set mDataRefreshed to true");
             mDataRefreshed = true;
         }

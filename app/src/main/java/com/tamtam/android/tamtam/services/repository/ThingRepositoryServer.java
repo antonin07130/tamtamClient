@@ -28,6 +28,8 @@ import com.tamtam.android.tamtam.services.json.MappingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -44,8 +46,8 @@ public class ThingRepositoryServer implements IThingRepository {
     private static final String TAG = "ThingRepositoryServer";
 
     // timeouts in ms
-    private final static int READ_TIMEOUT = 3000;
-    private final static int CONNECT_TIMEOUT = 3000;
+    private final static int READ_TIMEOUT = 10000;
+    private final static int CONNECT_TIMEOUT = 10000;
     private final static int RESPONSE_MAX_SIZE_IN_CHARS = 5000000 ;
 
     // todo : should the mapper be static ?
@@ -62,6 +64,7 @@ public class ThingRepositoryServer implements IThingRepository {
 
     public ThingRepositoryServer(URI serverBaseURI){
         if (serverBaseURI != null){
+            Log.d(TAG, "ThingRepositoryServer: Creation");
             mServerBaseURI = serverBaseURI;
         } else {
             throw new NullPointerException("ServerURI must be non null");
@@ -93,11 +96,13 @@ public class ThingRepositoryServer implements IThingRepository {
      */
     private String downloadUrl(URL url) throws IOException {
         InputStream stream = null;
-        HttpsURLConnection connection = null;
+        InputStream errorStream = null;
+        HttpURLConnection connection = null;
         String result = null;
-
+//todo change to https of course
         try {
-            connection = (HttpsURLConnection) url.openConnection();
+            Log.d(TAG, "downloadUrl: URL = " + url.toString());
+            connection = (HttpURLConnection) url.openConnection();
 
             // Timeout for reading InputStream arbitrarily set to 3000ms.
             connection.setReadTimeout(READ_TIMEOUT);
@@ -118,9 +123,23 @@ public class ThingRepositoryServer implements IThingRepository {
             //publishProgress(DownloadCallback.Progress.CONNECT_SUCCESS);
 
             int responseCode = connection.getResponseCode();
+            Log.d(TAG, "downloadUrl: Response Code = " + responseCode);
+
+            /*
             if (responseCode != HttpsURLConnection.HTTP_OK) {
                 throw new IOException("HTTP error code: " + responseCode);
+            }*/
+            Log.d(TAG, "downloadUrl: Response Msg = " + connection.getResponseMessage());
+
+
+
+            errorStream = connection.getErrorStream();
+            if (errorStream != null) {
+                // Converts Stream to String with max length of 500000.
+                result = readStream(errorStream, RESPONSE_MAX_SIZE_IN_CHARS);
+                Log.d(TAG, "downloadUrl: ErrorResponse = " + result);
             }
+
 
             // Retrieve the response body as an InputStream.
             stream = connection.getInputStream();
@@ -129,7 +148,7 @@ public class ThingRepositoryServer implements IThingRepository {
             // publishProgress(DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS, 0);
 
             if (stream != null) {
-                // Converts Stream to String with max length of 500.
+                // Converts Stream to String with max length of 500000.
                 result = readStream(stream, RESPONSE_MAX_SIZE_IN_CHARS);
             }
         } finally {
@@ -144,6 +163,164 @@ public class ThingRepositoryServer implements IThingRepository {
         return result;
     }
 
+
+
+    private String deleteUrl(URL url) throws IOException {
+        InputStream stream = null;
+        InputStream errorStream = null;
+        HttpURLConnection connection = null;
+        String result = null;
+//todo change to https of course
+        try {
+            Log.d(TAG, "downloadUrl: URL = " + url.toString());
+            connection = (HttpURLConnection) url.openConnection();
+
+            // Timeout for reading InputStream arbitrarily set to 3000ms.
+            connection.setReadTimeout(READ_TIMEOUT);
+
+            // Timeout for connection.connect() arbitrarily set to 3000ms.
+            connection.setConnectTimeout(CONNECT_TIMEOUT);
+
+            // For this use case, set HTTP method to GET.
+            connection.setRequestMethod("DELETE");
+
+            // Already true by default but setting just in case; needs to be true since this request
+            // is carrying an input (response) body.
+            connection.setDoInput(true);
+            // Open communications link (network traffic occurs here).
+            connection.connect();
+
+            // todo if needed setup callbacks responses to track progress
+            //publishProgress(DownloadCallback.Progress.CONNECT_SUCCESS);
+
+            int responseCode = connection.getResponseCode();
+            Log.d(TAG, "deleteURL: Response Code = " + responseCode);
+
+            /*
+            if (responseCode != HttpsURLConnection.HTTP_OK) {
+                throw new IOException("HTTP error code: " + responseCode);
+            }*/
+            Log.d(TAG, "deleteURL: Response Msg = " + connection.getResponseMessage());
+
+
+
+            errorStream = connection.getErrorStream();
+            if (errorStream != null) {
+                // Converts Stream to String with max length of 500000.
+                result = readStream(errorStream, RESPONSE_MAX_SIZE_IN_CHARS);
+                Log.d(TAG, "deleteURL: ErrorResponse = " + result);
+            }
+
+
+            // Retrieve the response body as an InputStream.
+            stream = connection.getInputStream();
+
+            // todo if needed setup callbacks responses to track progress
+            // publishProgress(DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS, 0);
+
+            if (stream != null) {
+                // Converts Stream to String with max length of 500000.
+                result = readStream(stream, RESPONSE_MAX_SIZE_IN_CHARS);
+            }
+        } finally {
+            // Close Stream and disconnect HTTPS connection.
+            if (stream != null) {
+                stream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return result;
+    }
+
+
+
+
+    /**
+     * <p>
+     * Given a URL, sets up a connection
+     * create a PUT request with body as body
+     *
+     * and gets the HTTP response body from the server.
+     * If the network request is successful, it returns the response body in String form. Otherwise,
+     * it will throw an IOException.
+     * </p>
+     */
+    private String uploadUrl(URL url, String jsonString) throws IOException {
+        InputStream stream = null;
+        InputStream errorStream = null;
+        HttpURLConnection connection = null;
+        String result = null;
+
+        try {
+            Log.d(TAG, "uploadUrl: URL = "+ url.toString());
+            connection = (HttpURLConnection) url.openConnection();
+
+            // Timeout for reading InputStream arbitrarily set to 3000ms.
+            connection.setReadTimeout(READ_TIMEOUT);
+
+            // Timeout for connection.connect() arbitrarily set to 3000ms.
+            connection.setConnectTimeout(CONNECT_TIMEOUT);
+
+            // For this use case, set HTTP method to PUT.
+            connection.setRequestMethod("PUT");
+
+            connection.setRequestProperty("Content-Type","application/json");
+
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            // Open communications link (network traffic occurs here).
+            connection.connect();
+
+            // todo if needed setup callbacks responses to track progress
+            //publishProgress(DownloadCallback.Progress.CONNECT_SUCCESS);
+
+            OutputStream os = connection.getOutputStream();
+            Log.d(TAG, "uploadUrl: json = " + jsonString);
+            os.write( jsonString.getBytes("UTF-8") );
+            os.close();
+            Log.d(TAG, "uploadUrl: connecion = " + connection.toString());
+            int responseCode = connection.getResponseCode();
+            Log.d(TAG, "uploadUrl: Response Code = " + responseCode);
+
+            /*
+            if (responseCode != HttpsURLConnection.HTTP_OK) {
+                throw new IOException("HTTP error code: " + responseCode);
+            }*/
+            Log.d(TAG, "uploadUrl: Response Msg = " + connection.getResponseMessage());
+
+            errorStream = connection.getErrorStream();
+            if (errorStream != null) {
+                // Converts Stream to String with max length of 500000.
+                result = readStream(errorStream, RESPONSE_MAX_SIZE_IN_CHARS);
+                Log.d(TAG, "uploadUrl: ErrorResponse = " + result);
+            }
+
+            // Retrieve the response body as an InputStream.
+            stream = connection.getInputStream();
+
+            // todo if needed setup callbacks responses to track progress
+            // publishProgress(DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS, 0);
+
+
+            if (stream != null) {
+                // Converts Stream to String with max length of 500000.
+                result = readStream(stream, RESPONSE_MAX_SIZE_IN_CHARS);
+
+                Log.d(TAG, "uploadUrl: Response = " + result);
+            }
+        } finally {
+            // Close Stream and disconnect HTTPS connection.
+            if (stream != null) {
+                stream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return result;
+    }
 
 
     /**
@@ -197,7 +374,7 @@ public class ThingRepositoryServer implements IThingRepository {
 
     @Override
     public ThingObject getById(String id) {
-        String requestPath = "";
+        String requestPath = "/things/" + id;
         ThingObject thing = null;
 
         try{
@@ -206,7 +383,8 @@ public class ThingRepositoryServer implements IThingRepository {
                     requestPath, // path
                     null); // fragment
 
-            mServerBaseURI.resolve(request);
+            // construct URI by resolving relative path and mServerBaseURI
+            Log.d(TAG, "getById: URI" + mServerBaseURI.resolve(request));
 
             String jsonThing = downloadUrl(mServerBaseURI.resolve(request).toURL());
 
@@ -232,8 +410,32 @@ public class ThingRepositoryServer implements IThingRepository {
 
     @Override
     public void add(ThingObject item) {
+        Log.d(TAG, "add: Start Adding procedure");
+
         if (item != null) {
-            // do something
+
+            String requestPath = "/things/" + item.getThingId();
+            ThingObject thing = null;
+
+            try{
+                URI request = new URI (null, // scheme
+                        null, // host
+                        requestPath, // path
+                        null); // fragment
+                Log.d(TAG, "getById: URI" + mServerBaseURI.resolve(request));
+
+                String response = uploadUrl(mServerBaseURI.resolve(request).toURL(), mapper.toJson(item));
+
+                Log.i(TAG, "add: " + response);
+
+            } catch (URISyntaxException e) {
+                Log.e(TAG, "getById: URI Syntax is not correct  ", e);
+            }catch (IOException e) {
+                Log.e(TAG, "getById: IO Error executing request",e );
+            } catch (MappingException e){
+                Log.e(TAG, "getById: Mapping to thing problem", e );
+            }
+
         }else {
             throw new NullPointerException("item can't be null");
         }
@@ -248,12 +450,14 @@ public class ThingRepositoryServer implements IThingRepository {
 
     @Override
     public void update(ThingObject item) {
+        removeById(item.getThingId());
+        add(item);
         // do something
     }
 
     @Override
     public void remove(ThingObject item) {
-        // do something
+        removeById(item.getThingId());
     }
 
     @Override
@@ -263,7 +467,32 @@ public class ThingRepositoryServer implements IThingRepository {
 
     @Override
     public void removeById(String id){
-        // do something
+        Log.d(TAG, "add: Start Removing procedure");
+
+        if (id != null && !id.isEmpty()) {
+
+            String requestPath = "/things/" + id;
+
+            try{
+                URI request = new URI (null, // scheme
+                        null, // host
+                        requestPath, // path
+                        null); // fragment
+                Log.d(TAG, "getById: URI" + mServerBaseURI.resolve(request));
+
+                String response = deleteUrl(mServerBaseURI.resolve(request).toURL());
+
+                Log.i(TAG, "remove: " + response);
+
+            } catch (URISyntaxException e) {
+                Log.e(TAG, "getById: URI Syntax is not correct  ", e);
+            }catch (IOException e) {
+                Log.e(TAG, "getById: IO Error executing request",e );
+            }
+
+        }else {
+            throw new NullPointerException("id can't be null or empty");
+        }
     }
 
     @Override

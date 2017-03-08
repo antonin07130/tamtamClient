@@ -25,7 +25,7 @@ import com.tamtam.android.tamtam.services.json.Mapper;
 import com.tamtam.android.tamtam.services.json.MappingException;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -59,7 +59,7 @@ public class FakeThingRepository implements Repository<ThingObject> {
      * @return all users in this repository
      */
     @Override
-    public List<ThingObject> getAll() {
+    public Collection<ThingObject> getAll() {
         // would have been a one liner with a Map function...
         ArrayList<ThingObject> objectList = new ArrayList<ThingObject>();
         try {
@@ -123,7 +123,7 @@ public class FakeThingRepository implements Repository<ThingObject> {
     }
 
     @Override
-    public List<ThingObject> getByIds(Iterable<String> ids) {
+    public Collection<ThingObject> getByIds(Iterable<String> ids) {
         return null;
     }
 

@@ -35,7 +35,7 @@ public interface Repository<M> {
      * @param ids of items to retrieve.
      * @return a {@link Iterable} of items of type M that match the querySpecification.
      */
-    Iterable<M> getByIds(Iterable<String> ids);
+    Collection<M> getByIds(Iterable<String> ids);
 
 
     /**
@@ -51,7 +51,7 @@ public interface Repository<M> {
      * get all items from the repository.
      * @return all items of type M in a {@link List}.
      */
-    Iterable<M> getAll();
+    Collection<M> getAll();
 
 
 
