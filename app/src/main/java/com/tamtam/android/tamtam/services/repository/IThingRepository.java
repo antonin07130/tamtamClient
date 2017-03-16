@@ -18,12 +18,24 @@
 
 package com.tamtam.android.tamtam.services.repository;
 
+import com.tamtam.android.tamtam.model.PositionObject;
 import com.tamtam.android.tamtam.model.ThingObject;
+
+import java.util.Collection;
 
 /**
  * Created by antoninpa on 28/01/17.
  */
 
 public interface IThingRepository extends Repository<ThingObject> {
+
+    /**
+     * Get objects near a geographical position
+     * @param position position around which we search for objects
+     * @param maxDistanceInMeters maximum distance around position to look for things
+     * @return null if not able to respond (empty cache or server conneciton issue),
+     * {@link Collection<ThingObject>} with 0 or more thing objects.
+     */
+    Collection<ThingObject> getNear(PositionObject position, double maxDistanceInMeters);
 
 }

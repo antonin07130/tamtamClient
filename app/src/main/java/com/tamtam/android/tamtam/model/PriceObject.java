@@ -29,6 +29,7 @@ import java.util.Currency;
  * todo : use android currency ? java.util.Currency;
  **/
 public class PriceObject implements java.io.Serializable {
+    private static final double precision = 0.00001; // when comparing pricevalues
     private final Currency currency;
     private final double price;
 
@@ -55,8 +56,9 @@ public class PriceObject implements java.io.Serializable {
         if (o == null || getClass() != o.getClass()) return false;
 
         PriceObject that = (PriceObject) o;
-
-        if (Double.compare(that.price, price) != 0) return false;
+        // todo use string to store price values instead of doubles to prevent truncation errors
+        //if (Double.compare(that.price, price) != 0) return false;
+        if ((that.price - price) / price > precision) return false;
         return currency.equals(that.currency);
 
     }

@@ -57,6 +57,12 @@ import static org.junit.Assert.assertNotNull;
  *  - {@link ThingRepositoryMemoryCacheIT}
  *  - ...
  *
+ *
+ *
+ * Warning ! : this test only works if user with userId "idUser0": exists in the server
+ * you can create it from a computer accessing the server database with this command :
+ * curl -H 'Content-Type: application/json' -X PUT -d '{"userId":"idUser0","interestedIn":["toto","tata"],"sellingThings":[]}' http://127.0.0.1:9000/users/idUser0 -v
+ *
  *  implementation tips from :
  *  <a href="https://moepad.wordpress.com/tutorials/testing-multiple-interface-implementations-w-junit-4/">
  *      moepad tutorials
@@ -122,6 +128,8 @@ public class ThingRepositoryIT_sub {
     private List<String> Ids2and3 =
             Arrays.asList(thingObject2.getThingId(), thingObject3.getThingId());
 
+    private List<String> Ids1and2and3 =
+            Arrays.asList(thingObject1.getThingId(), thingObject2.getThingId(), thingObject3.getThingId());
 
     @Test
     public void constructor() throws Exception {
@@ -143,6 +151,11 @@ public class ThingRepositoryIT_sub {
         // we use HashSets because order does not matter
         assertEquals(new HashSet<>(thingObjects2and3), fromRepoSet);
 
+        // cleanup
+        repo.remove(thingObject1);
+        repo.remove(thingObject2);
+        repo.remove(thingObject3);
+
     }
 
     @Test
@@ -159,18 +172,24 @@ public class ThingRepositoryIT_sub {
 
         fromRepo = repo.getById(thingObject3.getThingId());
         assertEquals(thingObject3,fromRepo);
+
+        // cleanup
+        repo.remove(thingObject1);
+        repo.remove(thingObject2);
+        repo.remove(thingObject3);
     }
 
     @Test
     public void add() throws Exception {
         IThingRepository repo = mThingRepository;
 
+        // adding 1 object
         repo.add(thingObject1);
 
         ThingObject fromRepo = repo.getById(thingObject1.getThingId());
         assertEquals(thingObject1, fromRepo);
 
-
+        // adding another object
         repo.add(thingObject2);
 
         Collection<ThingObject> fromRepoCollection = repo.getByIds(
@@ -179,7 +198,7 @@ public class ThingRepositoryIT_sub {
         assertEquals(new HashSet<ThingObject>(thingObjects1and2),
                      new HashSet<ThingObject>(fromRepoCollection));
 
-
+        // adding another object
         repo.add(thingObject3);
 
         fromRepoCollection = repo.getByIds(
@@ -189,37 +208,45 @@ public class ThingRepositoryIT_sub {
         assertEquals(new HashSet<ThingObject>(thingObjects123),
                      new HashSet<ThingObject>(fromRepoCollection));
 
+        // cleanup
+        repo.remove(thingObject1);
+        repo.remove(thingObject2);
+        repo.remove(thingObject3);
     }
-/*
-    @Test
-    public void add1() throws Exception {
 
-    }
 
     @Test
     public void update() throws Exception {
         IThingRepository repo = mThingRepository;
 
+        // adding 3 objects
         repo.add(thingObject1);
         repo.add(thingObject2);
         repo.add(thingObject3);
 
         assertEquals(thingObject1.getThingId(), thingObject1bis.getThingId());
-        assertEquals( positionObject1, repo.getById(thingObject1.getThingId()).getPosition());
+        assertEquals(positionObject1, repo.getById(thingObject1.getThingId()).getPosition());
 
-
+        // updating thingObject1 with thingObject1bis
         repo.update(thingObject1bis);
 
         assertEquals( positionObject1bis,
                       repo.getById(thingObject1bis.getThingId()).getPosition());
+        assertEquals( thingObject1.getPrice(),
+                repo.getById(thingObject1.getThingId()).getPrice());
 
         // no change on other items
         assertEquals( thingObject2.getPosition(),
                       repo.getById(thingObject2.getThingId()).getPosition());
-        assertEquals( thingObject1.getPrice(),
-                repo.getById(thingObject1.getThingId()).getPrice());
+
+        // cleanup
+        repo.remove(thingObject1);
+        repo.remove(thingObject2);
+        repo.remove(thingObject3);
+
     }
 
+    
     @Test
     public void remove() throws Exception {
         IThingRepository repo = mThingRepository;
@@ -231,19 +258,19 @@ public class ThingRepositoryIT_sub {
 
         repo.remove(thingObject2);
 
-        Collection<ThingObject> fromRepo = repo.getAll();
+        Collection<ThingObject> fromRepo = repo.getByIds(Ids1and2and3);
         assertEquals(new HashSet<>(thingObjects1and3),
                      new HashSet<>(fromRepo));
 
 
         repo.remove(thingObject3);
 
-        fromRepo = repo.getAll();
+        fromRepo = repo.getByIds(Ids1and2and3);
         assertEquals(new HashSet<>(Arrays.asList(thingObject1)),
                      new HashSet<>(fromRepo));
 
     }
-
+/*
     // used as a test cleanup
     @Test
     public void removeAll() throws Exception {

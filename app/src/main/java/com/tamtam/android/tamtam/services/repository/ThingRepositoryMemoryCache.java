@@ -20,6 +20,7 @@ package com.tamtam.android.tamtam.services.repository;
 
 import android.support.v4.util.LruCache;
 
+import com.tamtam.android.tamtam.model.PositionObject;
 import com.tamtam.android.tamtam.model.ThingObject;
 
 import java.io.File;
@@ -115,5 +116,23 @@ public class ThingRepositoryMemoryCache implements IThingRepository {
         for (String id:ids){
             removeById(id);
         }
+    }
+
+    // todo : implement cached getnear
+    @Override
+    public Collection<ThingObject> getNear(PositionObject position, double maxDistanceInMeters) {
+        if (hasFreshDataAbout(position)){
+            throw new IllegalStateException("Not implemented yet");
+            //return null;
+        }
+        else {
+            return null;
+        }
+    }
+
+
+    private boolean hasFreshDataAbout(PositionObject position){
+
+        return false;
     }
 }

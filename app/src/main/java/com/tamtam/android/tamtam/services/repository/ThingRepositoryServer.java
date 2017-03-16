@@ -18,9 +18,12 @@
 
 package com.tamtam.android.tamtam.services.repository;
 
+import android.support.v4.util.Pair;
 import android.util.Log;
 
+import com.tamtam.android.tamtam.model.PositionObject;
 import com.tamtam.android.tamtam.model.ThingObject;
+import com.tamtam.android.tamtam.services.json.JsonDistAndObjConverter;
 import com.tamtam.android.tamtam.services.json.JsonThingConverter;
 import com.tamtam.android.tamtam.services.json.Mapper;
 import com.tamtam.android.tamtam.services.json.MappingException;
@@ -35,6 +38,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -51,7 +56,11 @@ public class ThingRepositoryServer implements IThingRepository {
     private final static int RESPONSE_MAX_SIZE_IN_CHARS = 5000000 ;
 
     // todo : should the mapper be static ?
-    private final Mapper<String,ThingObject> mapper = new JsonThingConverter();
+    private final Mapper<String, ThingObject> mapper = new JsonThingConverter();
+
+    private final Mapper<String, Pair<Double,ThingObject>> distAndThingMapper =
+            new JsonDistAndObjConverter();
+
 
     private URI mServerBaseURI = null;
 
@@ -172,7 +181,7 @@ public class ThingRepositoryServer implements IThingRepository {
         String result = null;
 //todo change to https of course
         try {
-            Log.d(TAG, "downloadUrl: URL = " + url.toString());
+            Log.d(TAG, "deleteUrl: URL = " + url.toString());
             connection = (HttpURLConnection) url.openConnection();
 
             // Timeout for reading InputStream arbitrarily set to 3000ms.
@@ -214,6 +223,7 @@ public class ThingRepositoryServer implements IThingRepository {
 
             // Retrieve the response body as an InputStream.
             stream = connection.getInputStream();
+            Log.d(TAG, "deleteURL: could read a response = " + stream);
 
             // todo if needed setup callbacks responses to track progress
             // publishProgress(DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS, 0);
@@ -366,8 +376,13 @@ public class ThingRepositoryServer implements IThingRepository {
     @Override
     public Collection<ThingObject> getByIds(Iterable<String> ids) {
         ArrayList<ThingObject> foundThingList = new ArrayList<ThingObject>();
+
+        ThingObject currentThing = null;
         for (String id:ids){
-            foundThingList.add(getById(id));
+            currentThing = getById(id);
+            if (currentThing != null) { // do not care about null results (not found)
+                foundThingList.add(getById(id));
+            }
         }
         return foundThingList;
     }
@@ -406,7 +421,7 @@ public class ThingRepositoryServer implements IThingRepository {
     public Collection<ThingObject> getAll()
     {
         return null;
-    }
+    } // naaahhh you should not do that ...
 
     @Override
     public void add(ThingObject item) {
@@ -414,7 +429,8 @@ public class ThingRepositoryServer implements IThingRepository {
 
         if (item != null) {
 
-            String requestPath = "/things/" + item.getThingId();
+            //PUT {serviceRoot}/users/{userId}/sellingThings/{thingId} + Thing in the body encoded in JSon
+            String requestPath = "/users/idUser0/sellingThings/" + item.getThingId();
             ThingObject thing = null;
 
             try{
@@ -450,9 +466,9 @@ public class ThingRepositoryServer implements IThingRepository {
 
     @Override
     public void update(ThingObject item) {
+        // todo how unsafe is that method if connectivity is lost : VERY UNSAFE
         removeById(item.getThingId());
         add(item);
-        // do something
     }
 
     @Override
@@ -462,32 +478,32 @@ public class ThingRepositoryServer implements IThingRepository {
 
     @Override
     public void removeAll() {
-        // do something
+        // nnnaahhhh... I'm not letting you client app do that...
     }
 
     @Override
     public void removeById(String id){
-        Log.d(TAG, "add: Start Removing procedure");
+        Log.d(TAG, "removeById: Start Removing procedure of thing " + id);
 
         if (id != null && !id.isEmpty()) {
 
-            String requestPath = "/things/" + id;
-
+            // DELETE     /users/:userId/sellingThings/:thingId
+            String requestPath = "/users/idUser0/sellingThings/" + id;
             try{
                 URI request = new URI (null, // scheme
                         null, // host
                         requestPath, // path
                         null); // fragment
-                Log.d(TAG, "getById: URI" + mServerBaseURI.resolve(request));
+                Log.d(TAG, "removeById: URI: " + mServerBaseURI.resolve(request));
 
                 String response = deleteUrl(mServerBaseURI.resolve(request).toURL());
 
-                Log.i(TAG, "remove: " + response);
+                Log.i(TAG, "removeById: response: " + response);
 
             } catch (URISyntaxException e) {
-                Log.e(TAG, "getById: URI Syntax is not correct  ", e);
+                Log.e(TAG, "removeById: URI Syntax is not correct  ", e);
             }catch (IOException e) {
-                Log.e(TAG, "getById: IO Error executing request",e );
+                Log.e(TAG, "removeById: IO Error executing request",e );
             }
 
         }else {
@@ -498,7 +514,49 @@ public class ThingRepositoryServer implements IThingRepository {
     @Override
     public void removeByIds(Iterable<String> ids) {
         for (String id:ids){
-            removeById(id);
+            removeById(id); // todo : implement server side bulk remove
         }
+    }
+
+
+    @Override
+    public Collection<ThingObject> getNear(PositionObject position, double maxDistanceInMeters) {
+
+        //GET {serviceRoot}/things/near/{lon}/{lat}[?maxDistance=100][&num=10]
+        String requestPath = "/things/near/" +
+                position.getLongitude() + "/" + position.getLatitude() +
+                "?" + "maxDistance=" + maxDistanceInMeters +
+                "&" + "num=10";
+
+        List<ThingObject> things = null;
+
+        try{
+            URI request = new URI (null, // scheme
+                    null, // host
+                    requestPath, // path
+                    null); // fragment
+
+            // construct URI by resolving relative path and mServerBaseURI
+            Log.d(TAG, "getNear: URI" + mServerBaseURI.resolve(request));
+
+            String jsonListDistAndThing = downloadUrl(mServerBaseURI.resolve(request).toURL());
+
+            List<Pair<Double, ThingObject>> distAndThings =
+                    distAndThingMapper.fromJsonArray(jsonListDistAndThing);
+
+            things = new LinkedList();
+            for (Pair<Double, ThingObject> pair : distAndThings) {
+                things.add(pair.second);
+            }
+
+        } catch (URISyntaxException e) {
+            Log.e(TAG, "getNear: URI Syntax is not correct  ", e);
+        }catch (IOException e) {
+            Log.e(TAG, "getNear: IO Error executing request",e );
+        } catch (MappingException e){
+            Log.e(TAG, "getNear: Mapping to thing problem", e );
+        }
+
+        return things;
     }
 }

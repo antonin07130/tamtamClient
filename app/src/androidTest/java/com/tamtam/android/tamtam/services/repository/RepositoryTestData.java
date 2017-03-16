@@ -54,7 +54,7 @@ public class RepositoryTestData {
     public static final PositionObject positionObject1 =
             new PositionObject(7.05289, 43.6166);
     public static final PositionObject positionObject1bis =
-            new PositionObject(7.00, 44.00);
+            new PositionObject(7.0, 43.0);
     public static final PriceObject priceObject1 =
             new PriceObject(Currency.getInstance("EUR"), 10.10);
     public static final ThingPicture thingPicture1 =
